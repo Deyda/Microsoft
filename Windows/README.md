@@ -20,3 +20,6 @@ Gather info from one or more computers via CIM and write to CSV file
 
 ## Microsoft-InstalledSoftware.ps1
 Retrieve information on installed programs
+
+## Microsoft-GroupMembershipModifier.ps1
+Add or remove accounts from groups on Windows machines.
