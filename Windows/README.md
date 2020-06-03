@@ -5,3 +5,6 @@ List/add/remove autorun entries, so items run at logon, in start menu or registr
 
 ## Microsoft-CheckFixDomainMembership.ps1
 Check domain membership is ok and if not fix via stored credentials
+
+## Microsoft-CheckStartProcesses.ps1
+Check if any of a list of processes are not running and either just alert, prompt whether to run or just run based on parameters
