@@ -23,3 +23,6 @@ Retrieve information on installed programs
 
 ## Microsoft-GroupMembershipModifier.ps1
 Add or remove accounts from groups on Windows machines.
+
+## Microsoft-LocalProfileCleaner.ps1
+Add or remove accounts from groups on Windows machines.
