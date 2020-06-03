@@ -5,3 +5,6 @@ Show FSLogix currently mounted volume details & cross reference to FSLogix sessi
 
 ## FSLogix-ShrinkDisk.ps1
 Shrinks FSLogix Profile and O365 dynamically expanding disk(s).
+
+## FSLogix-CompactContainer.ps1
+This script shrinks/compacts and defragments VHD/VHDX files, reclaiming whitespace within the VHD/VHDX file.
