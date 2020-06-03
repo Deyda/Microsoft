@@ -29,3 +29,6 @@ Add or remove accounts from groups on Windows machines.
 
 ## Microsoft-LocalRedirectedFolder.ps1
 Redirect a user's special folders by calling the SHSetKnownFolderPath API or show existing folder redirections
+
+## Microsoft-UserSessions.ps1
+Report the user sessions, as returned by quser, from the machines in Active Directory that match the regular expression specified via -name
