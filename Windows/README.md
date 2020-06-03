@@ -32,3 +32,6 @@ Redirect a user's special folders by calling the SHSetKnownFolderPath API or sho
 
 ## Microsoft-UserSessions.ps1
 Report the user sessions, as returned by quser, from the machines in Active Directory that match the regular expression specified via -name
+
+## Microsoft-EventAggregator.ps1
+Retrieve all events from all 300+ event logs in a given time/date range and show in a sortable/filterable gridview or export to csv
