@@ -17,3 +17,6 @@ Use WMI to query computers to find out, since boot, when any remote desktop conn
 
 ## Microsoft-InfoViaCIM.ps1
 Gather info from one or more computers via CIM and write to CSV file
+
+## Microsoft-InstalledSoftware.ps1
+Retrieve information on installed programs
