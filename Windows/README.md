@@ -14,3 +14,6 @@ Delete profiles for members of an AD group which aren't in use
 
 ## Microsoft-RemoteUserLogonTime.ps1
 Use WMI to query computers to find out, since boot, when any remote desktop connections logged on
+
+## Microsoft-InfoViaCIM.ps1
+Gather info from one or more computers via CIM and write to CSV file
