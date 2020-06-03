@@ -26,3 +26,6 @@ Add or remove accounts from groups on Windows machines.
 
 ## Microsoft-LocalProfileCleaner.ps1
 Add or remove accounts from groups on Windows machines.
+
+## Microsoft-LocalRedirectedFolder.ps1
+Redirect a user's special folders by calling the SHSetKnownFolderPath API or show existing folder redirections
