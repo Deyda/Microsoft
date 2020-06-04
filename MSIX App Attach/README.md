@@ -32,35 +32,35 @@ userGroups |	List of AD groups: Members get the application linked in their star
 
 - Computer Configuration - Policies - Windows Settings - Scripts - Startup
 
- - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+  - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
- - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmStart
+  - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmStart
 
 - Computer Configuration - Policies - Windows Settings - Scripts - Shutdown
 
- - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+  - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
- - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmShutdown
+  - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmShutdown
 
 - User Configuration - Policies - Windows Settings - Scripts - Logon
 
- - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+  - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
- - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogon
+  - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogon
 
 - User Configuration - Policies - Windows Settings - Scripts - Logoff
 
- - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+  - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
- - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogoff
+  - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogoff
 
- - Where \\ads01\Configuration\WVD\MSIX\ is the path to the script and \\ads01\Configuration\WVD\MSIX\AppAttach.json the JSON-configuration file.
+  - Where \\ads01\Configuration\WVD\MSIX\ is the path to the script and \\ads01\Configuration\WVD\MSIX\AppAttach.json the JSON-configuration file.
 
 - Make sure that the GPO is linked to the computer and enable loopback processing:
 
 - Computer Configuration - Policies - Administrative Templates - System/Group Policy
 
- - Configure user Group Policy loopback processing mode: Enable - Mode: merge.
+  - Configure user Group Policy loopback processing mode: Enable - Mode: merge.
 
 ## Preparing the golden master for the session hosts
 To work with MSIX and have the script do the work you have to prepare your golden image:
@@ -73,15 +73,15 @@ To work with MSIX and have the script do the work you have to prepare your golde
 
 - Give the service GPSVC the right privileges to mount images:
 
- - Create a cmd-file with this content:
+  - Create a cmd-file with this content:
 ```
 sc privs gpsvc SeManageVolumePrivilege/SeTcbPrivilege/SeTakeOwnershipPrivilege/SeIncreaseQuotaPrivilege/SeAssignPrimaryTokenPrivilege/SeSecurityPrivilege/SeChangeNotifyPrivilege/SeCreatePermanentPrivilege/SeShutdownPrivilege/SeLoadDriverPrivilege/SeRestorePrivilege/SeBackupPrivilege/SeCreatePagefilePrivilege
 ```
- - Open an administrative cmd and execute:
+  - Open an administrative cmd and execute:
 ```
 psexec /s cmd
 ```
- - In this service cmd execute the cmd-file to give GPSVC the right permissions
+  - In this service cmd execute the cmd-file to give GPSVC the right permissions
 
 (This adds the SeManageVolumePrivilege which allows mounting of images)
 
