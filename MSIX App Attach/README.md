@@ -19,66 +19,69 @@ Please note that the assets below are community supproted and best effort. They 
 # AppAttach.ps1
 For each application, you have to define the following properties:
 
-Property	Note
-vhdSrc	Path to the expanded MSIX app (as vhd)
-volumeGuid	Guid of the vhd
-packageName	Name of the MSIX app attach package
-parentFolder	Root folder name in your vhd
-hostPools	List of host pool names where the package should be applied
-userGroups	List of AD groups: Members get the application linked in their start menu
+Property |	Note
+--------|-------
+vhdSrc | Path to the expanded MSIX app (as vhd)
+volumeGuid |	Guid of the vhd
+packageName |	Name of the MSIX app attach package
+parentFolder |	Root folder name in your vhd
+hostPools |	List of host pool names where the package should be applied
+userGroups |	List of AD groups: Members get the application linked in their start menu
 
-Refer this file by a group policy:
+## Refer this file by a group policy:
 
-Computer Configuration - Policies - Windows Settings - Scripts - Startup
+- Computer Configuration - Policies - Windows Settings - Scripts - Startup
 
-Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+ - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
-Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmStart
+ - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmStart
 
-Computer Configuration - Policies - Windows Settings - Scripts - Shutdown
+- Computer Configuration - Policies - Windows Settings - Scripts - Shutdown
 
-Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+ - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
-Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmShutdown
+ - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode VmShutdown
 
-User Configuration - Policies - Windows Settings - Scripts - Logon
+- User Configuration - Policies - Windows Settings - Scripts - Logon
 
-Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+ - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
-Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogon
+ - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogon
 
-User Configuration - Policies - Windows Settings - Scripts - Logoff
+- User Configuration - Policies - Windows Settings - Scripts - Logoff
 
-Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
+ - Name: %windir%\System32\WindowsPowerShell\v1.0\powershell.exe
 
-Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogoff
+ - Parameter: -ExecutionPolicy Unrestricted -File \ads01\Configuration\WVD\MSIX\AppAttach.ps1 -ConfigFile \\ads01\Configuration\WVD\MSIX\AppAttach.json -Mode UserLogoff
 
-Where \\ads01\Configuration\WVD\MSIX\ is the path to the script and \\ads01\Configuration\WVD\MSIX\AppAttach.json the JSON-configuration file.
+ - Where \\ads01\Configuration\WVD\MSIX\ is the path to the script and \\ads01\Configuration\WVD\MSIX\AppAttach.json the JSON-configuration file.
 
-Make sure that the GPO is linked to the computer and enable loopback processing:
+- Make sure that the GPO is linked to the computer and enable loopback processing:
 
-Computer Configuration - Policies - Administrative Templates - System/Group Policy
+- Computer Configuration - Policies - Administrative Templates - System/Group Policy
 
-Configure user Group Policy loopback processing mode: Enable - Mode: merge.
+ - Configure user Group Policy loopback processing mode: Enable - Mode: merge.
 
+## Preparing the golden master for the session hosts
 To work with MSIX and have the script do the work you have to prepare your golden image:
 
-Make sure that you have installed the right version from the insider build
+- Make sure that you have installed the right version from the insider build
 
-Double-check that you have NOT prepared your image with the command line commands described in https://docs.microsoft.com/en-us/azure/virtual-desktop/app-attach#prepare-the-vhd-image-for-azure (Disable Store auto-update and so on). It’s only for the VM concerning the converting process.
+- Double-check that you have NOT prepared your image with the command line commands described in https://docs.microsoft.com/en-us/azure/virtual-desktop/app-attach#prepare-the-vhd-image-for-azure (Disable Store auto-update and so on). It’s only for the VM concerning the converting process.
 
-Copy the PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec to %Windir%\System32 (you need psexec later)
+- Copy the PSTools https://docs.microsoft.com/en-us/sysinternals/downloads/psexec to %Windir%\System32 (you need psexec later)
 
-Give the service GPSVC the right privileges to mount images:
+- Give the service GPSVC the right privileges to mount images:
 
-Create a cmd-file with this content:
-
+ - Create a cmd-file with this content:
+```
 sc privs gpsvc SeManageVolumePrivilege/SeTcbPrivilege/SeTakeOwnershipPrivilege/SeIncreaseQuotaPrivilege/SeAssignPrimaryTokenPrivilege/SeSecurityPrivilege/SeChangeNotifyPrivilege/SeCreatePermanentPrivilege/SeShutdownPrivilege/SeLoadDriverPrivilege/SeRestorePrivilege/SeBackupPrivilege/SeCreatePagefilePrivilege
-Open an administrative cmd and execute:
-
+```
+ - Open an administrative cmd and execute:
+```
 psexec /s cmd
-
-In this service cmd execute the cmd-file to give GPSVC the right permissions
+```
+ - In this service cmd execute the cmd-file to give GPSVC the right permissions
 
 (This adds the SeManageVolumePrivilege which allows mounting of images)
 
