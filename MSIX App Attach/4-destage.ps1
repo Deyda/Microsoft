@@ -11,3 +11,6 @@ Remove-AppxPackage -AllUsers -Package $packageName
 cd $msixJunction 
 rmdir $packageName -Force -Verbose 
 #endregion
+
+#Dismount VHD
+disMount-Diskimage -ImagePath $vhdSrc
