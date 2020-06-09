@@ -1,14 +1,11 @@
 #MSIX app attach staging sample
 #region variables
 $vhdSrc="<path to vhd>"
- 
 $packageName = "<package name>" 
-
 $parentFolder = "<package parent folder>"
-$parentFolder = "\" + $parentFolder + "\"
-
 $volumeGuid = "<vol guid>"
 
+$parentFolder = "\" + $parentFolder + "\"
 $msixJunction = "C:\temp\AppAttach\" 
 #endregion
 
