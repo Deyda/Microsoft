@@ -19,7 +19,7 @@ $vhdObject = Mount-VHD $vhdSrc -Passthru
 $disk = Initialize-Disk -Passthru -Number $vhdObject.Number
 $partition = New-Partition -AssignDriveLetter -UseMaximumSize -DiskNumber $disk.Number
 Format-Volume -FileSystem NTFS -Confirm:$false -DriveLetter $partition.DriveLetter -Force
-$Path = $partition.DriveLetter + $parentFolder
+$Path = $partition.DriveLetter + ":" + $parentFolder
 
 #Create a folder with Package Parent Folder Variable as the name of the folder in root drive mounted above
 new-item -path $Path -ItemType Directory
