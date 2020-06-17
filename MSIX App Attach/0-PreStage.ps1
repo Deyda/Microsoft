@@ -1,4 +1,15 @@
-#Go and package your app using the MSIX App packager
+<#
+.SYNOPSIS
+The script create a VHD/X File and copy the MSIX Data in it
+.DESCRIPTION
+Use this script to create a MSIX App Attach Container
+.NOTES
+  Version:        1.0
+  Author:         Manuel Winkel <www.deyda.net>
+  Creation Date:  2020-06-04
+  Purpose/Change:
+#>
+
 #region variables
 
 $vhdSrc="<path to vhd>"
