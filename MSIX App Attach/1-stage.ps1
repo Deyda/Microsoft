@@ -1,4 +1,14 @@
-#MSIX app attach staging sample
+<#
+.SYNOPSIS
+The script mount the VHD/X File
+.DESCRIPTION
+Use this script to mount a MSIX App Attach Container
+.NOTES
+  Version:        1.0
+  Author:         Manuel Winkel <www.deyda.net>
+  Creation Date:  2020-06-04
+  Purpose/Change:
+#>
 #region variables
 $vhdSrc="<path to vhd>"
 $packageName = "<package name>" 
