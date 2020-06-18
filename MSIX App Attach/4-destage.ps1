@@ -20,7 +20,7 @@ $msixJunction = "C:\temp\AppAttach\"
 Remove-AppxPackage -AllUsers -Package $packageName
 
 cd $msixJunction 
-rmdir $packageName -Force -Verbose 
+rmdir $packageName -Recurse -Force -Confirm:$false
 #endregion
 
 #Dismount VHD
