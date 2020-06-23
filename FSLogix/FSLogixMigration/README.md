@@ -138,4 +138,16 @@ The example above will take inventory of all child-item directories, create a VH
 
 `PS C:\>Convert-UPDProfile -ProfilePath "C:\Users\UserDisk1.vhd" -Target "\\Server\FSLogixProfiles$" -MaxVHDSize 20 -VHDLogicalSectorSize 512 -VHD -IncludeRobocopyDetails -LogPath C:\temp\Log.txt` 
 
-The example above will take the User1 profile, create a VHD with a max size of 20GB, Sector Size 512, and copy the source profiles to their respective destinations. /TEE will be added to Robocopy parameters, and a Log will be generated at C:\Temp\Log.txt 
+The example above will take the User1 profile, create a VHD with a max size of 20GB, Sector Size 512, and copy the source profiles to their respective destinations. /TEE will be added to Robocopy parameters, and a Log will be generated at C:\Temp\Log.txt
+
+# Troubleshoot
+
+If you received the following error message:
+
+`Unable to resolve package source ‘https://www.powershellgallery.com/api/v2’`
+
+Solution:
+
+Run PowerShell as Administrator and run the following command to force to use TLS1.2 protocol
+
+`[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12`
