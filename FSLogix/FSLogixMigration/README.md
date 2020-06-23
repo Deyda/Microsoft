@@ -25,7 +25,7 @@ Following are the list of modules to be installed before the execution of the co
 
 # Getting started 
 
-Place the FSLogixMigration Folder in a PSModule directory, and import the module with:  
+Place the FSLogixMigration Folder in a PSModule directory (e.g. C:\Users\<USERNAME>\Documents\WindowsPowerShell\Modules), and import the module with:  
 
 Import-Module FSLogixMigration 
 
@@ -33,11 +33,11 @@ If the module is imported successfully you will see the welcome message.
 
 At the time of import, a check will be done for the following modules: 
 
-> ActiveDirectory 
+> ActiveDirectory (Add-WindowsFeature RSAT-AD-PowerShell)
 
-> Hyper-V 
+> Hyper-V (Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All)
 
-> Pester 
+> Pester (Install-Module -Name Pester -Force -SkipPublisherCheck)
  
 
 If any of these modules are not found, a warning message will be displayed: 
