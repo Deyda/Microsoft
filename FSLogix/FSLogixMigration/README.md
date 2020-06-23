@@ -117,7 +117,8 @@ Convert-RoamingProfile
 
 # Examples 
 
- 
+`PS Convert-RoamingProfile -ParentPath "\\vda01\C$\Users\" -Target "\\dc01.deyda.local\Container-New" -V
+HDMaxSizeGB 20 -VHDLogicalSectorSize 512 -VHD` 
 
 `PS C:\>Convert-RoamingProfile -ParentPath "C:\Users\" -Target "\\Server\FSLogixProfiles$" -MaxVHDSize 20 -VHDLogicalSectorSize 512`                                                                                                     
 
