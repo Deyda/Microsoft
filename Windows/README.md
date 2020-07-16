@@ -35,3 +35,6 @@ Report the user sessions, as returned by quser, from the machines in Active Dire
 
 ## Microsoft-EventAggregator.ps1
 Retrieve all events from all 300+ event logs in a given time/date range and show in a sortable/filterable gridview or export to csv
+
+## Microsoft-KillProcess.ps1
+Kills a process, if this process reaches a specific cpu limit and write a log file
