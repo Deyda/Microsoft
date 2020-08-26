@@ -77,11 +77,11 @@
         This script outputs a csv file with the result of the disk processing.  It will optionally produce a custom object with the same information
 
         .EXAMPLE
-      FSLogix-ShrinkDisk.ps1 -Path c:\Profile_user1.vhdx
+        FSLogix-ShrinkDisk.ps1 -Path c:\Profile_user1.vhdx
 	    This shrinks a single disk on the local file system
 
         .EXAMPLE
-      FSLogix-ShrinkDisk.ps1 -Path \\server\share -Recurse
+        FSLogix-ShrinkDisk.ps1 -Path \\server\share -Recurse
 	    This shrinks all disks in the specified share recursively
 
         .EXAMPLE
@@ -111,7 +111,7 @@
         This shrinks all disks in the specified share recursively increasing the number of threads used to 20 from the default 8.
 
         .EXAMPLE
-      FSLogix-ShrinkDisk.ps1 -Path \\server\share -Recurse -RatioFreeSpace 0.3
+        FSLogix-ShrinkDisk.ps1 -Path \\server\share -Recurse -RatioFreeSpace 0.3
 	    This shrinks all disks in the specified share recursively while not processing disks which have less than 30% whitespace instead of the default 15%.
 
         .LINK
