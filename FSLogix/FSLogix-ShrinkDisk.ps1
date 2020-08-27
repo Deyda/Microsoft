@@ -759,6 +759,9 @@ function Mount-FslDisk {
     PROCESS {
 
         try {
+            $user = $env:UserName
+            Get-SmbOpenFile | Where-Object -Property ClientUserName -Match $user | Close-SmbOpenFile -Force
+            Dismount-DiskImage -ImagePath $Path
             # Mount the disk without a drive letter and get it's info, Mount-DiskImage is used to remove reliance on Hyper-V tools
             # Don't remove get-diskimage it's needed as mount doesn't give back the full object in certain circumstances
             $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop | Get-DiskImage
