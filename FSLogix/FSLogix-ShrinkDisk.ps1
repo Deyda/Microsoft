@@ -171,7 +171,8 @@ Param (
 BEGIN {
     Set-StrictMode -Version Latest
     #Requires -RunAsAdministrator
-
+    Set-Location $Path
+    Get-ChildItem -include "*_ODFC*" -recurse -force | remove-item -force -ErrorAction SilentlyContinue
     #Invoke-Parallel - This is used to support powershell 5.x - if and when PoSh 7 and above become standard, move to ForEach-Object
 function Invoke-Parallel {
     <#
