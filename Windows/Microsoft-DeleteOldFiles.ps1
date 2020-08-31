@@ -35,12 +35,4 @@ Param
 $CurrentDate = Get-Date
 $DatetoDelete = $CurrentDate.AddDays($days)
 
-if( ! $profilesDeleted -or ! $profilesDeleted.Count )
-{
-    Write-Warning -Message "No unloaded profiles found for group `"$group`" out of $totalUnloadedProfiles profiles checked"
-}
-else
-{
-    Write-Verbose -Message "Deleted $($profilesDeleted.Count) profile for $($profilesDeleted.username -join ' ')"
-}
 Get-ChildItem $Path -Recurse ( | Where-Object { $_.LastWriteTime -lt $DatetoDelete } | Remove-Item
