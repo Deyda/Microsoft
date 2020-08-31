@@ -11,11 +11,11 @@ Delete all Files in a folder older than X day(s) based on parameters
 
 .PARAMETER path
 
-Delay, in seconds, before the script starts checking for missing processes. Useful if something else is going to start the process
+Path to the folder, where the files older than x day(s) are deleted
 
 .PARAMETER days
 
-The character used to separate the process from any optional arguments that need passing when the process is invoked if it is missing
+Number of days that the files to be deleted are old. Default is 30 days
 
 
 .EXAMPLE
@@ -34,4 +34,13 @@ Param
  
 $CurrentDate = Get-Date
 $DatetoDelete = $CurrentDate.AddDays($days)
+
+if( ! $profilesDeleted -or ! $profilesDeleted.Count )
+{
+    Write-Warning -Message "No unloaded profiles found for group `"$group`" out of $totalUnloadedProfiles profiles checked"
+}
+else
+{
+    Write-Verbose -Message "Deleted $($profilesDeleted.Count) profile for $($profilesDeleted.username -join ' ')"
+}
 Get-ChildItem $Path -Recurse ( | Where-Object { $_.LastWriteTime -lt $DatetoDelete } | Remove-Item
