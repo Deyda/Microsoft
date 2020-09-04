@@ -35,4 +35,4 @@ Param
 $CurrentDate = Get-Date
 $DatetoDelete = $CurrentDate.AddDays($days)
 
-Get-ChildItem $Path -Recurse ( | Where-Object { $_.LastWriteTime -lt $DatetoDelete } | Remove-Item
+Get-ChildItem $Path -Recurse | Where-Object { $_.LastWriteTime -lt $DatetoDelete } | Remove-Item

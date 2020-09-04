@@ -32,8 +32,9 @@
         FileIsNotDiskFormat		Disk file extension was not vhd or vhdx
         DiskDeletionFailed		Disk was last accessed before the number of days configured in the -DeleteOlderThanDays parameter and was not successfully deleted
         NoPartitionInfo			Could not get partition information for partition 1 from the disk
-        PartitionShrinkFailed		Failed to Shrink partition as part of the disk processing
+        PartitionShrinkFailed	Failed to Shrink partition as part of the disk processing
         DiskShrinkFailed		Could not shrink Disk
+        ResizeError             Could not Resize the Disk, mount the Disk and extend the volume
         PartitionSizeRestoreFailed 	Failed to Restore partition as part of the disk processing
 
         If the diskstate shows an error value from the list above, manual intervention may be required to make the disk usable again.
@@ -1019,12 +1020,23 @@ function Shrink-OneDisk {
 
         $partInfo = Get-Partition -DiskNumber $mount.DiskNumber | Where-Object -Property 'Type' -EQ -Value 'Basic'
         Get-Volume -Partition $partInfo | Optimize-Volume
-
-        #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
+        
+        #Resize partition
         try {
             $partitionsize = Get-PartitionSupportedSize -InputObject $partInfo -ErrorAction Stop
             $sizeMax = $partitionsize.SizeMax
+            Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction SilentlyContinue
+            }
+        catch {
+            Write-VhdOutput -DiskState 'ResizeError'
+            $mount | DisMount-FslDisk
+            return
         }
+        #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
+        try {
+            $partitionsize = Get-PartitionSupportedSize -DiskNumber $mount.DiskNumber -ErrorAction Stop
+            $sizeMax = $partitionsize.SizeMax
+            }
         catch {
             Write-VhdOutput -DiskState 'NoPartitionInfo'
             $mount | DisMount-FslDisk
@@ -1562,8 +1574,9 @@ function Shrink-OneDisk {
 
         #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
         try {
-            $partitionsize = Get-PartitionSupportedSize -InputObject $partInfo -ErrorAction Stop
+            $partitionsize = Get-PartitionSupportedSize -DiskNumber $mount.DiskNumber -ErrorAction Stop
             $sizeMax = $partitionsize.SizeMax
+            
         }
         catch {
             Write-VhdOutput -DiskState 'NoPartitionInfo'
