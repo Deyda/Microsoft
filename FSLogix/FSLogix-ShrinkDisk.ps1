@@ -766,7 +766,7 @@ function Mount-FslDisk {
             Dismount-DiskImage -ImagePath $Path
             # Mount the disk without a drive letter and get it's info, Mount-DiskImage is used to remove reliance on Hyper-V tools
             # Don't remove get-diskimage it's needed as mount doesn't give back the full object in certain circumstances
-            $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop | Get-DiskImage
+            $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop
         }
         catch {
             $e = $error[0]
@@ -774,16 +774,37 @@ function Mount-FslDisk {
             return
         }
 
-        try {
-            # Get the first basic partition. Disks created with powershell will have a Reserved partition followed by the Basic
-            # partition. Those created with frx.exe will just have a single Basic partition.
-            $partition = Get-Partition -DiskNumber $mountedDisk.Number | Where-Object -Property 'Type' -eq -Value 'Basic'
+
+        $diskNumber = $false
+        $timespan = (Get-Date).AddSeconds(15)
+        while ($diskNumber -eq $false -and $timespan -gt (Get-Date)) {
+            Start-Sleep 0.1
+            $mountedDisk = Get-DiskImage -ImagePath $Path
+            if ($mountedDisk.Number) {
+                $diskNumber = $true
+            }
         }
-        catch {
-            $e = $error[0]
-            # Cleanup
+
+        if ($diskNumber -eq $false) {
             $mountedDisk | Dismount-DiskImage -ErrorAction SilentlyContinue
-            Write-Error "Failed to read partition information for disk - `"$e`""
+            Write-Error 'Cannot get mount information'
+            return
+        }
+
+        $partitionType = $false
+        $timespan = (Get-Date).AddSeconds(15)
+        while ($partitionType -eq $false -and $timespan -gt (Get-Date)) {
+            Start-Sleep 0.1
+            $allPartition = Get-Partition -DiskNumber $mountedDisk.Number
+            if ($allPartition.Type -contains 'Basic') {
+                $partitionType = $true
+                $partition = $allPartition | Where-Object -Property 'Type' -EQ -Value 'Basic'
+            }
+        }
+
+        if ($partitionType -eq $false) {
+            $mountedDisk | Dismount-DiskImage -ErrorAction SilentlyContinue
+            Write-Error 'Cannot get partition information'
             return
         }
 
@@ -920,8 +941,8 @@ function Dismount-FslDisk {
     END { } #End
 }  #function Dismount-FslDisk
 
-    #Shrink-OneDisk
-function Shrink-OneDisk {
+    #Optimize-OneDisk
+function Optimize-OneDisk {
     [CmdletBinding()]
 
     Param (
@@ -1021,28 +1042,17 @@ function Shrink-OneDisk {
         $partInfo = Get-Partition -DiskNumber $mount.DiskNumber | Where-Object -Property 'Type' -EQ -Value 'Basic'
         Get-Volume -Partition $partInfo | Optimize-Volume
         
-        #Resize partition
+        #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
         try {
             $partitionsize = Get-PartitionSupportedSize -InputObject $partInfo -ErrorAction Stop
             $sizeMax = $partitionsize.SizeMax
-            Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction SilentlyContinue
-            }
-        catch {
-            Write-VhdOutput -DiskState 'ResizeError'
-            $mount | DisMount-FslDisk
-            return
+            #Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction SilentlyContinue
         }
-        #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
-        try {
-            $partitionsize = Get-PartitionSupportedSize -DiskNumber $mount.DiskNumber -ErrorAction Stop
-            $sizeMax = $partitionsize.SizeMax
-            }
         catch {
             Write-VhdOutput -DiskState 'NoPartitionInfo'
             $mount | DisMount-FslDisk
             return
         }
-
 
 
         #If you can't shrink the partition much, you can't reclaim a lot of space, so skipping if it's not worth it. Otherwise shink partition and dismount disk
@@ -1060,6 +1070,7 @@ function Shrink-OneDisk {
             return
         }
 
+        #If I decide to add Hyper-V module support, I'll need this code later
         if ($hyperv -eq $true) {
 	 
 	  
@@ -1148,6 +1159,7 @@ function Shrink-OneDisk {
             return
         }
 
+        #If I decide to add Hyper-V module support, I'll need this code later
         if ($hyperv -eq $true) {
             #Now we need to reinflate the partition to its previous size
             try {
@@ -1180,7 +1192,7 @@ function Shrink-OneDisk {
         Write-VhdOutput @paramWriteVhdOutput
     } #Process
     END { } #End
-}  #function Shrink-OneDisk
+}  #function Optimize-OneDisk
 
     #Write Output to file and optionally to pipeline
 function Write-VhdOutput {
@@ -1319,7 +1331,7 @@ function Mount-FslDisk {
         try {
             # Mount the disk without a drive letter and get it's info, Mount-DiskImage is used to remove reliance on Hyper-V tools
             # Don't remove get-diskimage it's needed as mount doesn't give back the full object in certain circumstances
-            $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop | Get-DiskImage
+            $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop
         }
         catch {
             $e = $error[0]
@@ -1327,16 +1339,37 @@ function Mount-FslDisk {
             return
         }
 
-        try {
-            # Get the first basic partition. Disks created with powershell will have a Reserved partition followed by the Basic
-            # partition. Those created with frx.exe will just have a single Basic partition.
-            $partition = Get-Partition -DiskNumber $mountedDisk.Number | Where-Object -Property 'Type' -eq -Value 'Basic'
+
+        $diskNumber = $false
+        $timespan = (Get-Date).AddSeconds(15)
+        while ($diskNumber -eq $false -and $timespan -gt (Get-Date)) {
+            Start-Sleep 0.1
+            $mountedDisk = Get-DiskImage -ImagePath $Path
+            if ($mountedDisk.Number) {
+                $diskNumber = $true
+            }
         }
-        catch {
-            $e = $error[0]
-            # Cleanup
+
+        if ($diskNumber -eq $false) {
             $mountedDisk | Dismount-DiskImage -ErrorAction SilentlyContinue
-            Write-Error "Failed to read partition information for disk - `"$e`""
+            Write-Error 'Cannot get mount information'
+            return
+        }
+
+        $partitionType = $false
+        $timespan = (Get-Date).AddSeconds(15)
+        while ($partitionType -eq $false -and $timespan -gt (Get-Date)) {
+            Start-Sleep 0.1
+            $allPartition = Get-Partition -DiskNumber $mountedDisk.Number
+            if ($allPartition.Type -contains 'Basic') {
+                $partitionType = $true
+                $partition = $allPartition | Where-Object -Property 'Type' -EQ -Value 'Basic'
+            }
+        }
+
+        if ($partitionType -eq $false) {
+            $mountedDisk | Dismount-DiskImage -ErrorAction SilentlyContinue
+            Write-Error 'Cannot get partition information'
             return
         }
 
@@ -1471,8 +1504,8 @@ function Dismount-FslDisk {
     } #Process
     END { } #End
 }  #function Dismount-FslDisk
-        #Shrink-OneDisk
-function Shrink-OneDisk {
+        #Optimize-OneDisk
+function Optimize-OneDisk {
     [CmdletBinding()]
 
     Param (
@@ -1574,7 +1607,7 @@ function Shrink-OneDisk {
 
         #Grab partition information so we know what size to shrink the partition to and what to re-enlarge it to.  This helps optimise-vhd work at it's best
         try {
-            $partitionsize = Get-PartitionSupportedSize -DiskNumber $mount.DiskNumber -ErrorAction Stop
+            $partitionsize = Get-PartitionSupportedSize -InputObject $partInfo -ErrorAction Stop
             $sizeMax = $partitionsize.SizeMax
             
         }
@@ -1601,8 +1634,8 @@ function Shrink-OneDisk {
             return
         }
 
+        #If I decide to add Hyper-V module support, I'll need this code later        
         if ($hyperv -eq $true) {
-	 
 	  
 		   
 			  
@@ -1689,6 +1722,7 @@ function Shrink-OneDisk {
             return
         }
 
+        #If I decide to add Hyper-V module support, I'll need this code later
         if ($hyperv -eq $true) {
             #Now we need to reinflate the partition to its previous size
             try {
@@ -1721,7 +1755,7 @@ function Shrink-OneDisk {
         Write-VhdOutput @paramWriteVhdOutput
     } #Process
     END { } #End
-}  #function Shrink-OneDisk
+}  #function Optimize-OneDisk
         #Write Output to file and optionally to pipeline
 function Write-VhdOutput {
     [CmdletBinding()]
@@ -1803,7 +1837,7 @@ function Write-VhdOutput {
     END { } #End
 }  #function Write-VhdOutput.ps1
 
-        $paramShrinkOneDisk = @{
+        $paramOptimizeOneDisk = @{
             Disk                = $_
             DeleteOlderThanDays = $using:DeleteOlderThanDays
             IgnoreLessThanGB    = $using:IgnoreLessThanGB
@@ -1811,7 +1845,7 @@ function Write-VhdOutput {
             PassThru            = $using:PassThru
             RatioFreeSpace      = $using:RatioFreeSpace
         }
-        Shrink-OneDisk @paramShrinkOneDisk
+        Optimize-OneDisk @paramOptimizeOneDisk
 
     } #Scriptblock
 
@@ -1819,7 +1853,7 @@ function Write-VhdOutput {
 
         $disk = $_
 
-        $paramShrinkOneDisk = @{
+        $paramOptimizeOneDisk = @{
             Disk                = $disk
             DeleteOlderThanDays = $DeleteOlderThanDays
             IgnoreLessThanGB    = $IgnoreLessThanGB
@@ -1827,7 +1861,7 @@ function Write-VhdOutput {
             PassThru            = $PassThru
             RatioFreeSpace      = $RatioFreeSpace
         }
-        Shrink-OneDisk @paramShrinkOneDisk
+        Optimize-OneDisk @paramOptimizeOneDisk
 
     } #Scriptblock
 
