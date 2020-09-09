@@ -53,6 +53,9 @@
         .PARAMETER Recurse
         Gets the disks in the specified locations and in all child items of the locations
 
+        .PARAMETER CleanUp
+        Gets the disks in the specified locations and in all child items of the locations
+
         .PARAMETER IgnoreLessThanGB
         The disk size in GB under which the script will not process the file.
 
@@ -150,6 +153,11 @@ Param (
     [Parameter(
         ValuefromPipelineByPropertyName = $true
     )]
+    [Switch]$CleanUp,
+
+    [Parameter(
+        ValuefromPipelineByPropertyName = $true
+    )]
     [System.String]$LogFilePath = "$env:TEMP\FslShrinkDisk $(Get-Date -Format yyyy-MM-dd` HH-mm-ss).csv",
 
     [Parameter(
@@ -172,8 +180,8 @@ Param (
 BEGIN {
     Set-StrictMode -Version Latest
     #Requires -RunAsAdministrator
-    Set-Location $Path
-    Get-ChildItem -include "*_ODFC*" -recurse -force | remove-item -force -ErrorAction SilentlyContinue
+    #Set-Location $Path
+    #Get-ChildItem -include "*_ODFC*" -recurse -force | remove-item -force -ErrorAction SilentlyContinue
     #Invoke-Parallel - This is used to support powershell 5.x - if and when PoSh 7 and above become standard, move to ForEach-Object
 function Invoke-Parallel {
     <#
@@ -751,7 +759,8 @@ function Mount-FslDisk {
         [Parameter(
             ValuefromPipelineByPropertyName = $true
         )]
-        [Switch]$PassThru
+        [Switch]$PassThru,
+        [Switch]$CleanUp
     )
 
     BEGIN {
@@ -760,10 +769,13 @@ function Mount-FslDisk {
     } # Begin
     PROCESS {
 
-        try {
-            $user = $env:UserName
-            Get-SmbOpenFile | Where-Object -Property ClientUserName -Match $user | Close-SmbOpenFile -Force
+        if ($CleanUp) {
+            #$user = $env:UserName
+            #Get-SmbOpenFile | Where-Object -Property ClientUserName -Match $user | Close-SmbOpenFile -Force
             Dismount-DiskImage -ImagePath $Path
+            Write-Error "Unmounted $Path"
+        }
+        try {
             # Mount the disk without a drive letter and get it's info, Mount-DiskImage is used to remove reliance on Hyper-V tools
             # Don't remove get-diskimage it's needed as mount doesn't give back the full object in certain circumstances
             $mountedDisk = Mount-DiskImage -ImagePath $Path -NoDriveLetter -PassThru -ErrorAction Stop | Get-DiskImage
