@@ -119,7 +119,7 @@
 	    This shrinks all disks in the specified share recursively while not processing disks which have less than 30% whitespace instead of the default 15%.
 
         .LINK
-        https://github.com/FSLogix/Invoke-FslShrinkDisk/
+        https://github.com/FSLogix/Invoke-FslShrinkDisk/blob/master/Invoke-FslShrinkDisk.ps1
 
     #>
 
