@@ -2,8 +2,6 @@
         .SYNOPSIS
         Checks Remote System for the Update State
 
-        @Deyda 2020
-
         .DESCRIPTION
         ###
 
@@ -85,6 +83,9 @@
                                             SecurityBulletin = $($Update.SecurityBulletinIDs)
                                             MsrcSeverity = $Update.MsrcSeverity
                                             IsDownloaded = $Update.IsDownloaded
+                                            Description = $Update.Description
+                                            RebootRequired = $Update.RebootRequired
+                                            ReleaseDate = $Update.LastDeploymentChangeTime
                                             Categories = ($Update.Categories | Select-Object -ExpandProperty Name)
                                             BundledUpdates = @($Update.BundledUpdates)|ForEach{
                                             [pscustomobject]@{
@@ -95,9 +96,9 @@
                       }
     }
     if ($PassThru) {
-    $updates |ft kb,title,msrcseverity,IsDownloaded -autosize
+    $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired -autosize
     }
     $Export = $Export.TrimEnd(".txt")
     $Export = "$Export $Computer.txt"
-    $updatelist = $updates |ft kb,title,msrcseverity,IsDownloaded
+    $updatelist = $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired
     Out-File -FilePath $Export -Width 256 -InputObject $Updatelist -Force
