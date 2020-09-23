@@ -2,6 +2,8 @@
         .SYNOPSIS
         Checks Remote System for the Update State
 
+        @Deyda 2020
+
         .DESCRIPTION
         ###
 
