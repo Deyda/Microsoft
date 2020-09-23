@@ -95,10 +95,12 @@
                                       }
                       }
     }
-    if ($PassThru) {
-    $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired -autosize
+    If ($searchresult.Updates.Count -gt 0) {
+                        if ($PassThru) {
+                                        $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired -autosize
+                        }
+                        $Export = $Export.TrimEnd(".txt")
+                        $Export = "$Export $Computer.txt"
+                        $updatelist = $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired
+                        Out-File -FilePath $Export -Width 256 -InputObject $Updatelist -Force
     }
-    $Export = $Export.TrimEnd(".txt")
-    $Export = "$Export $Computer.txt"
-    $updatelist = $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired
-    Out-File -FilePath $Export -Width 256 -InputObject $Updatelist -Force
