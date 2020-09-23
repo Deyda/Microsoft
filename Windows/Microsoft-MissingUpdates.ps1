@@ -99,7 +99,8 @@
                         if ($PassThru) {
                                         $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired -autosize
                         }
-                        $Export = $Export.TrimEnd(".txt")
+                        #$Export = $Export.TrimEnd(".txt")
+                        $Export = $Export.Substring(0, $Export.IndexOf('.'))
                         $Export = "$Export $Computer.txt"
                         $updatelist = $updates |ft kb,title,msrcseverity,ReleaseDate,IsDownloaded,RebootRequired
                         Out-File -FilePath $Export -Width 256 -InputObject $Updatelist -Force
