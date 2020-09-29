@@ -1,4 +1,7 @@
 <#
+        .AUTHOR
+        Jim Moyle
+        Change Version by Manuel Winkel (www.deyda.net).
         .SYNOPSIS
         Shrinks FSLogix Profile and O365 dynamically expanding disk(s).
         .DESCRIPTION
@@ -1942,7 +1945,7 @@
 
         if ($partSize -eq $false) {
             #$partInfo | Export-Clixml -Path "$env:TEMP\ForJim-$($Disk.Name).xml"
-            Write-VhdOut
+            #Write-VhdOut
                 Write-VhdOutput -DiskState 'No Partition Supported Size Info - The Windows Disk SubSystem did not respond in a timely fashion try increasing number of cores or decreasing threads by using the ThrottleLimit parameter' -EndTime (Get-Date)
                 $mount | DisMount-FslDisk
                 return
