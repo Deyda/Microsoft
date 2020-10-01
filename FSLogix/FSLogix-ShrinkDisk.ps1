@@ -1079,7 +1079,7 @@
         } # Begin
         PROCESS {
             #In case there are disks left mounted let's try to clean up.
-            Dismount-DiskImage -ImagePath $Path -ErrorAction SilentlyContinue
+            Dismount-DiskImage -ImagePath $Disk.FullName -ErrorAction SilentlyContinue
 
             #Get start time for logfile
             $startTime = Get-Date
