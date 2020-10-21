@@ -39,7 +39,7 @@ Last modified Date: 05-02-2020
 
 .EXAMPLES
     Expand an existing FSLogix Profile Container to a total size of 40GB:
-    FSLogix-ExpandContainer.ps1 -ContainerDir "E:\FSLogix\Profiles" -ContainerSize 40 -ContainerType Profile
+    FSLogix-ExpandDisk.ps1 -ContainerDir "E:\FSLogix\Profiles" -ContainerSize 40 -ContainerType Profile
 
 *************************************************************************************************************************************
 #>

@@ -1130,7 +1130,7 @@
                     return
                 }
             }
-    
+            
             #As disks take time to process, if you have a lot of disks, it may not be worth shrinking the small onesBytes
             if ( $IgnoreLessThanGB -and $originalSize -lt $IgnoreLessThanBytes ) {
                 Write-VhdOutput -DiskState 'Ignored' -EndTime (Get-Date)
@@ -1221,10 +1221,14 @@
                 $mount | DisMount-FslDisk
                 return
             }
-    
-    
+
+            if ( $sizeMax -ne $partInfo.Size ) {
+                Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction Stop
+                Write-Warning -Message "Extended Disk $Disk"
+                }
+
             #If you can't shrink the partition much, you can't reclaim a lot of space, so skipping if it's not worth it. Otherwise shink partition and dismount disk
-    
+            
             if ( $partitionsize.SizeMin -gt $disk.Length ) {
                 Write-VhdOutput -DiskState "SkippedAlreadyMinimum" -EndTime (Get-Date)
                 $mount | DisMount-FslDisk
