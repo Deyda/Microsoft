@@ -12,7 +12,7 @@ $VHDInfo = foreach ($VHD in $VHDXFiles) {
         MinimumSize    = ($info.MinimumSize / 1gb)
         VHDPath        = $info.path
         Type           = $info.vhdtype
-        PercentageFull   = ($info.size / $info.FileSize *100 )
+        PercentageFull   = ($info.FileSize / $info.size *100 )
     }
 }
  
