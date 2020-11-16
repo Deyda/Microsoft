@@ -1,4 +1,4 @@
-$initialgroup = Get-ADGroupMember -Identity "GroupA" -Recurisve | Select Name
+$initialgroup = Get-ADGroupMember -Identity "GroupA" -Recursive | Select Name
 
 #Create yourself a "bad list" of people that you don't want in your new list. These are people in GroupB, GroupC, GroupD:
 
