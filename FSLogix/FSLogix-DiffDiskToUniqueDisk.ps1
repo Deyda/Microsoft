@@ -34,10 +34,15 @@ Number of created session containers.
 
 .EXAMPLE
 
-& '.\FSLogix-DiffDiskToUniqueDisk.ps1' -path D:\CTXFSLogix -tmp D:\TMP
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -Recurse -tmp D:\TMP
 
-Copy and rename from Path D:\CTXFSLogix, with temporary storage in D:\TMP
+Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, with temporary storage in D:\TMP and create 1 session disk.
 
+.EXAMPLE
+
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -Recurse -count 9 -delete
+
+Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, and create 9 session disk. After that the original Difference Container are deleted
 #>
 
 [CmdletBinding()]
@@ -126,7 +131,11 @@ if ($Recurse) {
     }
     Copy-Item -Path $tmpall -Destination $path -Recurse -Force
     Remove-Item $tmpall -Recurse
-
+    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+        $PathACL=$($_.Directory)
+        $PathACLPlus=""+$PathACL+"\*.VHDX"
+        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
+        }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
     }
@@ -175,6 +184,11 @@ else {
     }
     Copy-Item -Path $tmpall -Destination $path -Force
     Remove-Item $tmpall
+    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+        $PathACL=$($_.Directory)
+        $PathACLPlus=""+$PathACL+"\*.VHDX"
+        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
+        }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
     }
