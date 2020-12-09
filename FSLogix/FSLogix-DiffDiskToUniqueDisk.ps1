@@ -9,6 +9,8 @@ Copy and rename existing VHDX container. After renaming, copy the new container 
   Author:         Manuel Winkel <www.deyda.net>
   Creation Date:  2020-12-07
   Purpose/Change:
+  - New Parameter Count to create more than one Session Disk
+  - New Parameter Target to create Session Disks on new place
 <#
 
 
@@ -35,10 +37,6 @@ Gets the disks in the specified locations and in all child items of the location
 .PARAMETER count
 
 Number of created session containers.
-
-.PARAMETER verbose
-
-Verbose Mode
 
 .EXAMPLE
 
