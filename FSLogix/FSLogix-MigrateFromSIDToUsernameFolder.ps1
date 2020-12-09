@@ -1,6 +1,77 @@
-$target="D:\Friedhof\Folder3\"
-$path="D:\Friedhof\Spielwiese\*"
+#requires -version 3
+<#
+.SYNOPSIS
+Migrate FSLogix Container vom Folder Name Schema SID_USERNAME to USERNAME_SID
+.DESCRIPTION
+If you don't set the more readable naming schema (USERNAME_SID) directly, you can't just do this afterwards.
+Because it creates new folders and there, if not migrated before, new containers.
+Therefore copy the existing containers to the new location before.
+.NOTES
+  Version:        1.0
+  Author:         Manuel Winkel <www.deyda.net>
+  Creation Date:  2020-12-09
+  Purpose/Change:
+<#
 
+
+.PARAMETER path
+
+Path to the old FSLogix Container Location
+
+.PARAMETER target
+
+Path to the new FSLogix Container Location. If not set, the source (path) is used as target.
+
+.PARAMETER tmp
+
+Path for the temporary storage. By Default it's C:\Windows\Temp\Script
+
+.PARAMETER delete
+
+Delete the source Disk Folder.
+
+
+.EXAMPLE
+
+& '.\FSLogix-MigrateFromSIDToUsernameFolder.ps1 -path "D:\CTXFslogix\" -tmp D:\TMP
+
+Copy the disks in the specified locations (New Naming Schema) and in all child items from Path D:\CTXFSLogix, with temporary storage in D:\TMP.
+
+#>
+
+[CmdletBinding()]
+
+
+Param (
+    
+        [Parameter(
+            Mandatory = $true,
+            HelpMessage='FSLogix Container Source Path'            
+        )]
+        [System.String]$path,
+    
+        [Parameter(
+            HelpMessage='FSLogix Container Target Path'            
+        )]
+        [System.String]$target,
+
+        [Parameter(
+            HelpMessage='Delete Original Folder'
+        )]
+        [switch]$delete,
+    
+        [Parameter(
+            HelpMessage='Path for Temporary Storage'
+        )]
+        [System.String]$tmp = "C:\Windows\Temp\Script"
+    
+    )
+
+
+
+#$target="D:\Friedhof\Folder3\"
+#$path="D:\Friedhof\Spielwiese\*"
+#$tmp = "D:\TMP"
 
 
 Get-ChildItem -recurse $path -include *-SESSION-* -ErrorAction SilentlyContinue | Foreach-Object {
