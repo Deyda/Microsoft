@@ -36,6 +36,10 @@ Gets the disks in the specified locations and in all child items of the location
 
 Number of created session containers.
 
+.PARAMETER verbose
+
+Verbose Mode
+
 .EXAMPLE
 
 & '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -Recurse -tmp D:\TMP
@@ -79,7 +83,7 @@ Param (
             HelpMessage='Path for Temporary Storage'
         )]
         [System.String]$tmp = "C:\Windows\Temp\Script",
-    
+
         [Parameter(
             HelpMessage='Container in the specified locations and in all child items of the locations'
         )]
