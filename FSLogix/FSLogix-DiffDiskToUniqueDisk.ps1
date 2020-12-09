@@ -88,8 +88,9 @@ Param (
     )
 
 
-#$path = "D:\CTXFslogix"
+#$path = "D:\Friedhof\Spielwiese"
 #$tmp = "D:\TMP"
+#$target = "D:\Friedhof\Folder2"
 
 if (!$target){
     $target = $path
@@ -142,10 +143,16 @@ if ($Recurse) {
     }
     Copy-Item -Path $tmpall -Destination $target -Recurse -Force
     Remove-Item $tmpall -Recurse
-    Get-ChildItem –Path $target -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
-        $PathACL=$($_.Directory)
-        $PathACLPlus=""+$PathACL+"\*.VHDX"
-        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
+    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+        $PathACL = $($_.Directory)
+        $ContainerName = $($_.Name)
+        $parts = $ContainerName.split(".")
+        $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
+        Get-ChildItem –Path $target -Recurse -Filter $SessionName | Foreach-Object {
+        $TargetACL = $($_.Directory)}
+        $PathACLPlus = ""+$PathACL+"\*.VHDX"
+        $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
+        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
         }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
@@ -195,10 +202,16 @@ else {
     }
     Copy-Item -Path $tmpall -Destination $target -Force
     Remove-Item $tmpall
-    Get-ChildItem –Path $target -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
-        $PathACL=$($_.Directory)
-        $PathACLPlus=""+$PathACL+"\*.VHDX"
-        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
+    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+        $PathACL = $($_.Directory)
+        $ContainerName = $($_.Name)
+        $parts = $ContainerName.split(".")
+        $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
+        Get-ChildItem –Path $target -Recurse -Filter $SessionName | Foreach-Object {
+        $TargetACL = $($_.Directory)}
+        $PathACLPlus = ""+$PathACL+"\*.VHDX"
+        $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
+        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
         }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
