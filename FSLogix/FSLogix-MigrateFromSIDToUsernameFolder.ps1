@@ -73,6 +73,9 @@ Param (
 #$path="D:\Friedhof\Spielwiese\*"
 #$tmp = "D:\TMP"
 
+if (!$target){
+    $target = $path
+}
 
 Get-ChildItem -recurse $path -include *-SESSION-* -ErrorAction SilentlyContinue | Foreach-Object {
 $pathnew = "$($_.directory)"
