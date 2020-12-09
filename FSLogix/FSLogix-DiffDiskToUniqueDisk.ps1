@@ -102,43 +102,43 @@ if ($Recurse) {
     
     if ($count -ge 1) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
     }
     if ($count -ge 2) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
     }
     if ($count -ge 3) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
     }
     if ($count -ge 4) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
     }
     if ($count -ge 5) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
     }
     if ($count -ge 6) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
     }
     if ($count -ge 7) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
     }
     if ($count -ge 8) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
     }
     if ($count -ge 9) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
     }
     if ($count -ge 10) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
-        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
+        Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
     }
     Copy-Item -Path $tmpall -Destination $target -Recurse -Force
     Remove-Item $tmpall -Recurse
@@ -155,47 +155,47 @@ else {
         
     if ($count -ge 1) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
     }
     if ($count -ge 2) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
     }
     if ($count -ge 3) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
     }
     if ($count -ge 4) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-*-Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX| ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX| ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
     }
     if ($count -ge 5) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
     }
     if ($count -ge 6) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
     }
     if ($count -ge 7) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
     }
     if ($count -ge 8) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
     }
     if ($count -ge 9) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
     }
     if ($count -ge 10) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
+        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
     }
     Copy-Item -Path $tmpall -Destination $target -Force
     Remove-Item $tmpall
-    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+    Get-ChildItem –Path $target -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
         $PathACL=$($_.Directory)
         $PathACLPlus=""+$PathACL+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
