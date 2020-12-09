@@ -91,7 +91,7 @@ Param (
 #$path = "D:\CTXFslogix"
 #$tmp = "D:\TMP"
 
-if ($target == null){
+if (!$target){
     $target = $path
 }
 
