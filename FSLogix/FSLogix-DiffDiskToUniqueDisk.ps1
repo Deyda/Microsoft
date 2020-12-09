@@ -16,6 +16,10 @@ Copy and rename existing VHDX container. After renaming, copy the new container 
 
 Path to the FSLogix Container Location
 
+.PARAMETER target
+
+Path to the new FSLogix Container Location. If not set, the source (path) is used as target.
+
 .PARAMETER tmp
 
 Path for the temporary storage. By Default it's C:\Windows\Temp\Script
@@ -57,6 +61,11 @@ Param (
         [System.String]$path,
     
         [Parameter(
+            HelpMessage='FSLogix Container Target Path'            
+        )]
+        [System.String]$target,
+
+        [Parameter(
             HelpMessage='Delete Original Difference Disk Container'
         )]
         [switch]$delete,
@@ -82,7 +91,9 @@ Param (
 #$path = "D:\CTXFslogix"
 #$tmp = "D:\TMP"
 
-
+if ($target == null){
+    $target = $path
+}
 
 $tmpall = $tmp+"\*"
 $pathall = $path+"\*"
@@ -129,9 +140,9 @@ if ($Recurse) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
     }
-    Copy-Item -Path $tmpall -Destination $path -Recurse -Force
+    Copy-Item -Path $tmpall -Destination $target -Recurse -Force
     Remove-Item $tmpall -Recurse
-    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+    Get-ChildItem –Path $target -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
         $PathACL=$($_.Directory)
         $PathACLPlus=""+$PathACL+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $PathACLPlus
@@ -182,7 +193,7 @@ else {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
         Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
     }
-    Copy-Item -Path $tmpall -Destination $path -Force
+    Copy-Item -Path $tmpall -Destination $target -Force
     Remove-Item $tmpall
     Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
         $PathACL=$($_.Directory)
