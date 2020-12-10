@@ -69,15 +69,26 @@ Param (
 
 
 
-#$target="D:\Friedhof\Folder3\"
+#$target="D:\Friedhof\Folder3"
 #$path="D:\Friedhof\Spielwiese\*"
 #$tmp = "D:\TMP"
 
 if (!$target){
     $target = $path
 }
+$regex1 = $target -match [regex] "\\$"
+if ($regex1 -eq $False){
+$target = $target+"\"}
 
-Get-ChildItem -recurse $path -include *-SESSION-* -ErrorAction SilentlyContinue | Foreach-Object {
+$regex2 = $path -match [regex] "\*$"
+if ($regex2 -eq $False){
+    $regex3 = $path -match [regex] "\\\*$"
+    if ($regex3 -eq $False){
+    $path = $path+"\*"}
+    else{
+        $path = $path+"*"}}
+
+Get-ChildItem -recurse $path -ErrorAction SilentlyContinue | Foreach-Object {
 $pathnew = "$($_.directory)"
 $path1 = $pathnew+"\*"
 $partcount = ([regex]::Matches($path1, "\\" )).count
@@ -97,5 +108,8 @@ $destnew = $target+$partsdest[1]+"_"+$partsdest[2]+"_"+$partsdest[3]+"_"+$partsd
     if(!(Test-Path -path $destnew))  
         {New-Item -ItemType directory -Path $destnew             
         }
-move-item -Path $path1 -Destination $destnew -include *-SESSION-* -ErrorAction SilentlyContinue
+move-item -Path $path1 -Destination $destnew -ErrorAction SilentlyContinue
 }
+    if ($Delete){
+        Remove-Item  -Recurse
+    }
