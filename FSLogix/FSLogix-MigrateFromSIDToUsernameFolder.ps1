@@ -7,7 +7,7 @@ If you don't set the more readable naming schema (USERNAME_SID) directly, you ca
 Because it creates new folders and there, if not migrated before, new containers.
 Therefore copy the existing containers to the new location before.
 .NOTES
-  Version:        1.0
+  Version:        1.3
   Author:         Manuel Winkel <www.deyda.net>
   Creation Date:  2020-12-09
   Purpose/Change:
@@ -22,9 +22,6 @@ Path to the old FSLogix Container Location
 
 Path to the new FSLogix Container Location. If not set, the source (path) is used as target.
 
-.PARAMETER tmp
-
-Path for the temporary storage. By Default it's C:\Windows\Temp\Script
 
 .PARAMETER delete
 
@@ -33,9 +30,9 @@ Delete the source Disk Folder.
 
 .EXAMPLE
 
-& '.\FSLogix-MigrateFromSIDToUsernameFolder.ps1 -path "D:\CTXFslogix\" -tmp D:\TMP
+& '.\FSLogix-MigrateFromSIDToUsernameFolder.ps1 -path D:\CTXFslogix -target D:\FSLogixCTX
 
-Copy the disks in the specified locations (New Naming Schema) and in all child items from Path D:\CTXFSLogix, with temporary storage in D:\TMP.
+Copy the disks in the specified locations (New Naming Schema) and in all child items from Path D:\CTXFSLogix to D:\FSLogixCTX
 
 #>
 
@@ -58,20 +55,15 @@ Param (
         [Parameter(
             HelpMessage='Delete Original Folder'
         )]
-        [switch]$delete,
-    
-        [Parameter(
-            HelpMessage='Path for Temporary Storage'
-        )]
-        [System.String]$tmp = "C:\Windows\Temp\Script"
+        [switch]$delete
     
     )
 
 
 
-#$target="D:\Friedhof\Folder3"
-#$path="D:\Friedhof\Spielwiese\*"
-#$tmp = "D:\TMP"
+#$target="D:\Friedhof\Folder2"
+#$path="D:\Friedhof\Folder3"
+
 
 if (!$target){
     $target = $path
@@ -84,11 +76,11 @@ $regex2 = $path -match [regex] "\*$"
 if ($regex2 -eq $False){
     $regex3 = $path -match [regex] "\\\*$"
     if ($regex3 -eq $False){
-    $path = $path+"\*"}
+    $path2 = $path+"\*"}
     else{
-        $path = $path+"*"}}
+        $path2 = $path+"*"}}
 
-Get-ChildItem -recurse $path -ErrorAction SilentlyContinue | Foreach-Object {
+Get-ChildItem -recurse $path2 -Include *vhdx -ErrorAction SilentlyContinue | Foreach-Object {
 $pathnew = "$($_.directory)"
 $path1 = $pathnew+"\*"
 $partcount = ([regex]::Matches($path1, "\\" )).count
@@ -109,7 +101,15 @@ $destnew = $target+$partsdest[1]+"_"+$partsdest[2]+"_"+$partsdest[3]+"_"+$partsd
         {New-Item -ItemType directory -Path $destnew             
         }
 move-item -Path $path1 -Destination $destnew -ErrorAction SilentlyContinue
+Get-ChildItem –Path $target -Recurse -Filter *.VHDX | Foreach-Object {
+        $PathACL = $($_.Directory)
+        $ContainerName = $($_.Name)
+        $parts = $ContainerName.split(".")
+        $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
+        $PathACLPlus = ""+$PathACL+"\*"
+        Get-Acl -Path $PathACLPlus | Set-Acl -Path $PathACL
+        }
 }
     if ($Delete){
-        Remove-Item  -Recurse
+        Remove-Item $path -Recurse
     }

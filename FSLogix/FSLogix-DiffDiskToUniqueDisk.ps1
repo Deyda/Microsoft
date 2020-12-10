@@ -36,15 +36,15 @@ Number of created session containers.
 
 .EXAMPLE
 
-& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -tmp D:\TMP
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path D:\CTXFslogix -tmp D:\TMP -target D:\FSLogixCTX
 
-Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, with temporary storage in D:\TMP and create 1 session disk.
+Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix to D:\FSLogixCTX, with temporary storage in D:\TMP and create 1 session disk.
 
 .EXAMPLE
 
-& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -count 9 -delete
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path D:\CTXFslogix -count 9 -delete
 
-Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, and create 9 session disk. After that the original Difference Container are deleted
+Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix to D:\CTXFSLogix, and create 9 session disk. After that the original Difference Container are deleted
 #>
 
 [CmdletBinding()]
@@ -148,7 +148,7 @@ $pathall = $path+"\*"
         $PathACLPlus = ""+$PathACL+"\*.VHDX"
         $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
-        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL -Verbose
+        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL
         }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
