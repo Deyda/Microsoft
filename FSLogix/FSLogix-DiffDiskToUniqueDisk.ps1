@@ -30,23 +30,19 @@ Path for the temporary storage. By Default it's C:\Windows\Temp\Script
 
 Delete the source Differnce Disk FSLogix Container.
 
-.PARAMETER recurse
-
-Gets the disks in the specified locations and in all child items of the locations
-
 .PARAMETER count
 
 Number of created session containers.
 
 .EXAMPLE
 
-& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -Recurse -tmp D:\TMP
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -tmp D:\TMP
 
 Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, with temporary storage in D:\TMP and create 1 session disk.
 
 .EXAMPLE
 
-& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -Recurse -count 9 -delete
+& '.\FSLogix-DiffDiskToUniqueDisk.ps1 -path "D:\CTXFslogix\" -count 9 -delete
 
 Copy and rename the disks in the specified locations and in all child items from Path D:\CTXFSLogix, and create 9 session disk. After that the original Difference Container are deleted
 #>
@@ -80,12 +76,7 @@ Param (
         [Parameter(
             HelpMessage='Path for Temporary Storage'
         )]
-        [System.String]$tmp = "C:\Windows\Temp\Script",
-
-        [Parameter(
-            HelpMessage='Container in the specified locations and in all child items of the locations'
-        )]
-        [Switch]$Recurse
+        [System.String]$tmp = "C:\Windows\Temp\Script"
     
     )
 
@@ -98,10 +89,12 @@ if (!$target){
     $target = $path
 }
 
+$regex1 = $target -match [regex] "\\$"
+if ($regex1 -eq $False){
+$target = $target+"\"}
+
 $tmpall = $tmp+"\*"
 $pathall = $path+"\*"
-
-if ($Recurse) {
     
     if ($count -ge 1) {
         Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
@@ -155,69 +148,8 @@ if ($Recurse) {
         $PathACLPlus = ""+$PathACL+"\*.VHDX"
         $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
+        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL -Verbose
         }
     if ($Delete){
         Remove-Item $pathall -exclude *-SESSION-* -Recurse
     }
-}
-else {
-        
-    if ($count -ge 1) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
-    }
-    if ($count -ge 2) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
-    }
-    if ($count -ge 3) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
-    }
-    if ($count -ge 4) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-*-Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX| ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
-    }
-    if ($count -ge 5) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
-    }
-    if ($count -ge 6) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
-    }
-    if ($count -ge 7) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
-    }
-    if ($count -ge 8) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
-    }
-    if ($count -ge 9) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
-    }
-    if ($count -ge 10) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Force
-        Get-ChildItem -Path $tmpall -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
-    }
-    Copy-Item -Path $tmpall -Destination $target -Force
-    Remove-Item $tmpall
-    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
-        $PathACL = $($_.Directory)
-        $ContainerName = $($_.Name)
-        $parts = $ContainerName.split(".")
-        $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
-        Get-ChildItem –Path $target -Recurse -Filter $SessionName | Foreach-Object {
-        $TargetACL = $($_.Directory)}
-        $PathACLPlus = ""+$PathACL+"\*.VHDX"
-        $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
-        Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
-        }
-    if ($Delete){
-        Remove-Item $pathall -exclude *-SESSION-* -Recurse
-    }
-}
-
-
