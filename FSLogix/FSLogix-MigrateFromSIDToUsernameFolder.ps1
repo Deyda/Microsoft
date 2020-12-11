@@ -40,76 +40,62 @@ Copy the disks in the specified locations (New Naming Schema) and in all child i
 
 
 Param (
-    
-        [Parameter(
-            Mandatory = $true,
-            HelpMessage='FSLogix Container Source Path'            
-        )]
-        [System.String]$path,
-    
-        [Parameter(
-            HelpMessage='FSLogix Container Target Path'            
-        )]
-        [System.String]$target,
 
-        [Parameter(
-            HelpMessage='Delete Original Folder'
-        )]
-        [switch]$delete
-    
-    )
+    [Parameter(
+        Mandatory = $true,
+        HelpMessage = 'FSLogix Container Source Path'
+    )]
+    [System.String]$path,
 
+    [Parameter(
+        HelpMessage = 'FSLogix Container Target Path'
+    )]
+    [System.String]$target,
 
+    [Parameter(
+        HelpMessage = 'Delete Original Folder'
+    )]
+    [switch]$delete
 
-#$target="D:\Friedhof\Folder2"
-#$path="D:\Friedhof\Folder3"
+)
 
 
-if (!$target){
-    $target = $path
+#Test for paths Error and exit if they are not present
+If (!Test-Path $path){
+    Write-Error "$path does not exist"
+    break
 }
-$regex1 = $target -match [regex] "\\$"
-if ($regex1 -eq $False){
-$target = $target+"\"}
+If (!Test-Path $target) {
+    Write-Error "$target does not exist"
+    break
+}
 
-$regex2 = $path -match [regex] "\*$"
-if ($regex2 -eq $False){
-    $regex3 = $path -match [regex] "\\\*$"
-    if ($regex3 -eq $False){
-    $path2 = $path+"\*"}
-    else{
-        $path2 = $path+"*"}}
+#Get all paths which end in vhdx and process them
+Get-ChildItem -Recurse $path2 -Include *vhdx -ErrorAction SilentlyContinue | ForEach-Object {
 
-Get-ChildItem -recurse $path2 -Include *vhdx -ErrorAction SilentlyContinue | Foreach-Object {
-$pathnew = "$($_.directory)"
-$path1 = $pathnew+"\*"
-$partcount = ([regex]::Matches($path1, "\\" )).count
-$parts = $pathnew.split("\")
-$destdriss = $parts[$partcount-1]
-$destcount = ([regex]::Matches($destdriss, "_" )).count
-$partsdest = $destdriss.split("_")
-if ($destcount -eq 1){
-$destnew = $target+$partsdest[1]+"_"+$partsdest[0]
-}
-if ($destcount -eq 2){
-$destnew = $target+$partsdest[1]+"_"+$partsdest[2]+"_"+$partsdest[0]
-}
-if ($destcount -eq 3){
-$destnew = $target+$partsdest[1]+"_"+$partsdest[2]+"_"+$partsdest[3]+"_"+$partsdest[0]
-}
-    if(!(Test-Path -path $destnew))  
-        {New-Item -ItemType directory -Path $destnew             
-        }
-move-item -Path $path1 -Destination $destnew -ErrorAction SilentlyContinue
-Get-ChildItem –Path $target -Recurse -Filter *.VHDX | Foreach-Object {
-        $PathACL = $($_.Directory)
-        $ContainerName = $($_.Name)
-        $parts = $ContainerName.split(".")
-        $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
-        $PathACLPlus = ""+$PathACL+"\*"
-        Get-Acl -Path $PathACLPlus | Set-Acl -Path $PathACL
-        }
-}
-    if ($Delete){
-        Remove-Item $path -Recurse
+    $vhdPath = $_
+    $pathSource = $vhdPath.directory
+    #Grab user name and sid using regex and swap them round warn and quit if no match
+    if ((Split-Path -Path $pathSource -Leaf) -match "(.*?)_(.*)") {
+        $newDirName = $matches[2] + '_' + $matches[1]
     }
+    else {
+        write-warning "$pathnew was not correct format"
+        break
+    }
+
+    #create final path string
+    $destnew = Join-Path $target $newDirName
+
+    if (!(Test-Path -Path $destnew)) {
+        New-Item -ItemType directory -Path $destnew
+    }
+    #move the disk
+    Move-Item -Path $vhdPath -Destination $destnew
+    #set permissions
+    Get-Acl -Path $pathSource | Set-Acl -Path $destnew
+
+}
+if ($Delete) {
+    Remove-Item $path -Recurse
+}
