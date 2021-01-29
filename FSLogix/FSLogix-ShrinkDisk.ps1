@@ -1087,7 +1087,7 @@
                 $IgnoreLessThanBytes = $IgnoreLessThanGB * 1024 * 1024 * 1024
             }
     
-            #Grab size of disk being porcessed
+            #Grab size of disk being processed
             $originalSize = $Disk.Length
             
             #Rolling Log File
@@ -1819,7 +1819,7 @@
         } # Begin
         PROCESS {
             #In case there are disks left mounted let's try to clean up.
-            Dismount-DiskImage -ImagePath $Path -ErrorAction SilentlyContinue
+            Dismount-DiskImage -ImagePath $Disk.FullName -ErrorAction SilentlyContinue
 
             #Get start time for logfile
             $startTime = Get-Date
