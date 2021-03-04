@@ -1,0 +1,9 @@
+.pdf, AcroExch.Document.DC
+.pdfxml, AcroExch.pdfxml
+.acrobatsecuritysettings, AcroExch.acrobatsecuritysettings
+.fdf, AcroExch.FDFDoc
+.xfdf, AcroExch.XFDFDoc
+.xdp, AcroExch.XDPDoc
+.pdx, PDXFileType
+.api, AcroExch.Plugin
+.secstore, AcroExch.SecStore

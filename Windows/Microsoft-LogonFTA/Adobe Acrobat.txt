@@ -1,0 +1,12 @@
+.pdf, Acrobat.Document.DC
+.pdfxml, Acrobat.pdfxml
+.acrobatsecuritysettings, Acrobat.acrobatsecuritysettings
+.fdf, Acrobat.FDFDoc
+.xfdf, Acrobat.XFDFDoc
+.xdp, Acrobat.XDPDoc
+.pdx, PDXFileType
+.api, Acrobat.Plugin
+.secstore, Acrobat.SecStore
+.sequ, Acrobat.Sequence
+.rmf, Acrobat.RMFFile
+.bpdx, AcrobatBPDXFileType
