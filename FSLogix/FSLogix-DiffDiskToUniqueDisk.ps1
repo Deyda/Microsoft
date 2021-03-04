@@ -138,12 +138,12 @@ $pathall = $path+"\*"
     }
     Copy-Item -Path $tmpall -Destination $target -Recurse -Force
     Remove-Item $tmpall -Recurse
-    Get-ChildItem –Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+    Get-ChildItem -Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
         $PathACL = $($_.Directory)
         $ContainerName = $($_.Name)
         $parts = $ContainerName.split(".")
         $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
-        Get-ChildItem –Path $target -Recurse -Filter $SessionName | Foreach-Object {
+        Get-ChildItem -Path $target -Recurse -Filter $SessionName | Foreach-Object {
         $TargetACL = $($_.Directory)}
         $PathACLPlus = ""+$PathACL+"\*.VHDX"
         $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
