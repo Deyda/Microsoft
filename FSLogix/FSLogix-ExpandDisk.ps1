@@ -3,9 +3,9 @@
 *************************************************************************************************************************************
 Name:               Expand-Container
 Author:             Kasper Johansen
-Website:            https://virtualwarlock.net
-Version:            1.0            
-Last modified Date: 05-02-2020
+Modifier:           Manuel Winkel
+Version:            1.1            
+Last modified Date: 05-05-2022
 
 *************************************************************************************************************************************
 
@@ -177,5 +177,5 @@ function Expand-Container
             }
         Stop-Transcript
     }
-
+Set-Service -Name defragsvc -StartupType Manual
 Expand-Container $ContainerDir $ContainerSize $ContainerType
