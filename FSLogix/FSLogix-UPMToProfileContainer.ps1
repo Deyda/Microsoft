@@ -6,7 +6,7 @@ This script migrate from UPM to FSLogix Profile Container
 Test before using!!
 
 .NOTES
-  Version:          1.2
+  Version:          1.3
   Author:           
   Rewrite Author:   Manuel Winkel <www.deyda.net>
   Creation Date:    2020-03-04
@@ -18,25 +18,25 @@ Test before using!!
 # Requires -RunAsAdministrator
 # My Userprofiles come only with SAMAccount Name without Domain "\Username\2012R2\UPM_Profile
 #########################################################################################
-# Example from my UPM Path "\\path_to_your_share\username\2012R2\UPM_Profile"
+# Example from my UPM Path "c:\share\username\2012R2\UPM_Profile"
 # Example for Profile Container Name "emea"+"\"+$sam+"."+$Domain
 
 # fslogix Root profile path
-$newprofilepath = "\\path_to_your_share\FSLogix"
+$newprofilepath = "c:\share\xdprofile"
 # UPM Root profile path
-$oldprofilepath = "\\path_to_your_share\UPM\Userprofiles"
+$oldprofilepath = "c:\share\fslogix"
 # Subfolder 1 - First Path to UPM_Profile Folder in UPM Profiles - see my example above
-$subfolder1 = "2012R2"
+$subfolder1 = "Win2019"
 # Subfolder 2 - First Path to UPM_Profile Folder in UPM Profiles - see my example above
 $subfolder2 = "UPM_Profile"
 # Username - If it is not a SamAccountname the domain must be defined here (Leave blank for SamAccountName)
-$Domain = ""
+$Domain = "deyda.net"
 
 #########################################################################################
 $oldprofiles = Get-ChildItem $oldprofilepath | Select-Object -Expand fullname | Sort-Object | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"| ForEach-Object{
 Join-Path $_ $subfolder1\$subfolder2
 }
-
+#$old = $oldprofiles
 foreach ($old in $oldprofiles) {
 $sam = Split-Path ($old -split $subfolder1)[0] -leaf
 If ($Domain) {
@@ -44,7 +44,7 @@ If ($Domain) {
 }
 $sid = (New-Object System.Security.Principal.NTAccount($sam)).translate([System.Security.Principal.SecurityIdentifier]).Value
 # fslogix profile folder name (Please use the variable $sid for the SID and $sam for the username)
-$newprofilefolder = $sam+"\"+$sid+"_"+$sam
+$newprofilefolder = "emea"+"\"+$sam+"."+$Domain
 $regtext = "Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$sid]
@@ -60,8 +60,8 @@ $regtext = "Windows Registry Editor Version 5.00
 
 $nfolder = join-path $newprofilepath ($newprofilefolder)
 if (!(test-path $nfolder)) {New-Item -Path $nfolder -ItemType directory | Out-Null}
-& icacls $nfolder /setowner "$env:userdomain\$sam" /T /C
-& icacls $nfolder /grant $env:userdomain\$sam`:`(OI`)`(CI`)F /T
+& icacls $nfolder /setowner "$env:userdomain\"+"$sam" /T /C
+& icacls $nfolder /grant $env:userdomain\"+"$sam`:`(OI`)`(CI`)F /T
 $vhd = Join-Path $nfolder ("Profile_"+$sam+".vhdx")
 
 $script1 = "create vdisk file=`"$vhd`" maximum 30720 type=expandable"
