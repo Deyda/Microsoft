@@ -6,11 +6,12 @@ This script migrate from UPM to FSLogix Profile Container
 Test before using!!
 
 .NOTES
-  Version:          1.0
+  Version:          1.1
   Author:           
   Rewrite Author:   Manuel Winkel <www.deyda.net>
   Creation Date:    2020-03-04
   Purpose/Change:
+  2022-01-20      Add variable to change the Profile Container folder
 #>
 #########################################################################################
 # Setup Parameter first here newprofile oldprofile subfolder1 subfolder2
@@ -18,6 +19,8 @@ Test before using!!
 # My Userprofiles come only with SAMAccount Name without Domain "\Username\2012R2\UPM_Profile
 #########################################################################################
 # Example from my UPM Path "\\path_to_your_share\username\2012R2\UPM_Profile"
+# Example for Profile Container Name "emea"+"\"+$sam+".corp"
+
 # fslogix Root profile path
 $newprofilepath = "\\path_to_your_share\FSLogix"
 # UPM Root profile path
@@ -28,8 +31,6 @@ $subfolder1 = "2012R2"
 $subfolder2 = "UPM_Profile"
 
 #########################################################################################
-# Do not edit here
-#########################################################################################
 $oldprofiles = gci $oldprofilepath | select -Expand fullname | sort | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"| %{
 Join-Path $_ $subfolder1\$subfolder2
 }
@@ -37,6 +38,8 @@ Join-Path $_ $subfolder1\$subfolder2
 foreach ($old in $oldprofiles) {
 $sam = Split-Path ($old -split $subfolder1)[0] -leaf
 $sid = (New-Object System.Security.Principal.NTAccount($sam)).translate([System.Security.Principal.SecurityIdentifier]).Value
+# fslogix profile folder name (Please use the variable $sid for the SID and $sam for the username)
+$newprofilefolder = $sam+"\"+$sid+"_"+$sam
 $regtext = "Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$sid]
@@ -50,7 +53,7 @@ $regtext = "Windows Registry Editor Version 5.00
 `"RunLogonScriptSync`"=dword:00000000
 "
 
-$nfolder = join-path $newprofilepath ($sam+"\"+$sid+"_"+$sam)
+$nfolder = join-path $newprofilepath ($newprofilefolder)
 if (!(test-path $nfolder)) {New-Item -Path $nfolder -ItemType directory | Out-Null}
 & icacls $nfolder /setowner "$env:userdomain\$sam" /T /C
 & icacls $nfolder /grant $env:userdomain\$sam`:`(OI`)`(CI`)F /T
