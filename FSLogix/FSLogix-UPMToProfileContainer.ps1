@@ -19,7 +19,7 @@ Test before using!!
 # My Userprofiles come only with SAMAccount Name without Domain "\Username\2012R2\UPM_Profile
 #########################################################################################
 # Example from my UPM Path "\\path_to_your_share\username\2012R2\UPM_Profile"
-# Example for Profile Container Name "emea"+"\"+$sam+".corp"
+# Example for Profile Container Name "emea"+"\"+$sam+"."+$Domain
 
 # fslogix Root profile path
 $newprofilepath = "\\path_to_your_share\FSLogix"
@@ -29,6 +29,8 @@ $oldprofilepath = "\\path_to_your_share\UPM\Userprofiles"
 $subfolder1 = "2012R2"
 # Subfolder 2 - First Path to UPM_Profile Folder in UPM Profiles - see my example above
 $subfolder2 = "UPM_Profile"
+# Username - If it is not a SamAccountname the domain must be defined here (Leave blank for SamAccountName)
+$Domain = ""
 
 #########################################################################################
 $oldprofiles = Get-ChildItem $oldprofilepath | Select-Object -Expand fullname | Sort-Object | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"| ForEach-Object{
@@ -37,6 +39,9 @@ Join-Path $_ $subfolder1\$subfolder2
 
 foreach ($old in $oldprofiles) {
 $sam = Split-Path ($old -split $subfolder1)[0] -leaf
+If ($Domain) {
+  $sam = Split-Path ($sam -split "."+$domain)[0] -leaf
+}
 $sid = (New-Object System.Security.Principal.NTAccount($sam)).translate([System.Security.Principal.SecurityIdentifier]).Value
 # fslogix profile folder name (Please use the variable $sid for the SID and $sam for the username)
 $newprofilefolder = $sam+"\"+$sid+"_"+$sam
