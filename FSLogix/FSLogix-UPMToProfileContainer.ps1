@@ -6,7 +6,7 @@ This script migrate from UPM to FSLogix Profile Container
 Test before using!!
 
 .NOTES
-  Version:          1.1
+  Version:          1.2
   Author:           
   Rewrite Author:   Manuel Winkel <www.deyda.net>
   Creation Date:    2020-03-04
