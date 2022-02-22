@@ -135,7 +135,7 @@ Function Remove-Package()
 
     if( $package.ComputerName -eq $env:COMPUTERNAME )
     {
-        Write-Verbose "Removing `"$($package.DisplayName)`" ..."
+        Write-Verbose "Removing "$($package.DisplayName)" ..."
 
         if( ! [string]::IsNullOrEmpty( $package.Uninstall ) )
         {
@@ -144,7 +144,7 @@ Function Remove-Package()
                 ## need to split uninstall line so we can pass to Start-Process since we need to wait for each to finish in turn
                 [string]$executable = $null
                 [string]$arguments = $null
-                if( $package.Uninstall -match '^"([^"]*)"\s?(.*)$' `
+                if( $package.Uninstall -match '^"([^"]*)"\s?(.*)$'
                     -or $package.Uninstall -match '^(.*\.exe)\s?(.*)$' ) ## cope with spaces in path but no quotes
                 {
                     $executable = $Matches[1]
@@ -180,14 +180,14 @@ Function Remove-Package()
                     }
                     else
                     {
-                        Write-Warning "Don't know how to run silent uninstall for package `"$($package.DisplayName)`", uninstaller `"$executable`""
+                        Write-Warning "Don't know how to run silent uninstall for package "$($package.DisplayName)", uninstaller "$executable""
                     }
                 }
                 if( ! [string]::IsNullOrEmpty( $arguments ) )
                 {
                     $processArguments.Add( 'ArgumentList' , $arguments )
                 }
-                Write-Verbose "Running $executable `"$arguments`" for $($package.DisplayName) ..."
+                Write-Verbose "Running $executable "$arguments" for $($package.DisplayName) ..."
                 $uninstallProcess = Start-Process @processArguments
                 if( ( Get-Variable -Name 'uninstallProcess' -ErrorAction SilentlyContinue ) -and $uninstallProcess ) ## catch where user declined UAC elevation
                 {
@@ -195,7 +195,7 @@ Function Remove-Package()
                     ## https://docs.microsoft.com/en-us/windows/desktop/Msi/error-codes
                     if( $uninstallProcess.ExitCode -eq 3010 ) ## maybe should check it's msiexec that ran
                     {
-                        Write-Warning "Uninstall of `"$($package.DisplayName)`" requires a reboot"
+                        Write-Warning "Uninstall of "$($package.DisplayName)" requires a reboot"
                     }
                     $uninstallerRan = $true
                 }
@@ -203,12 +203,12 @@ Function Remove-Package()
         }
         else
         {
-            Write-Warning "Unable to uninstall `"$($package.DisplayName)`" as it has no uninstall string"
+            Write-Warning "Unable to uninstall "$($package.DisplayName)" as it has no uninstall string"
         }
     }
     else
     {
-        Write-Warning "Unable to uninstall `"$($package.DisplayName)`" as it is on $($package.ComputerName) and may not be silent"
+        Write-Warning "Unable to uninstall "$($package.DisplayName)" as it is on $($package.ComputerName) and may not be silent"
     }
 
     $uninstallerRan
@@ -283,7 +283,7 @@ Function Process-RegistryKey
                 }
                 else
                 {
-                    Write-Warning "Ignoring `"$hive\$thisKey`" on $computername as has no DisplayName entry"
+                    Write-Warning "Ignoring "$hive\$thisKey" on $computername as has no DisplayName entry"
                 }
 
                 $thisSubKey.Close()
@@ -292,7 +292,7 @@ Function Process-RegistryKey
         }
         elseif( $hive -eq 'HKLM' )
         {
-            Write-Warning "Failed to open `"$hive\$UninstallKey`" on $computername"
+            Write-Warning "Failed to open "$hive\$UninstallKey" on $computername"
         }
     }
 }
@@ -330,7 +330,7 @@ if( $remove -and $remove.Count )
 
     if( $invalids -and $invalids.Count )
     {
-        Throw "There were $($invalids.Count) -remove arguments which were invalid regular expressions:`n`tError $($invalids -join "`n`tError ")"
+        Throw "There were $($invalids.Count) -remove arguments which were invalid regular expressions:ntError $($invalids -join "ntError ")"
     }
 }
 
@@ -357,7 +357,7 @@ if( ! $computers -or $computers.Count -eq 0 )
     }
     else
     {
-        Throw "Column name `"$computerColumnName`" missing from `"$importcsv`""
+        Throw "Column name "$computerColumnName" missing from "$importcsv""
     }
 
     if( $computername -eq '.' )
@@ -442,7 +442,7 @@ if( $installed -and $installed.Count )
         [int]$matched = 0
         ForEach( $removal in $remove )
         {
-            $removed = $installed | Where-Object { $_.DisplayName -match $removal } | ForEach-Object `
+            $removed = $installed | Where-Object { $_.DisplayName -match $removal } | ForEach-Object 
             {
                 $matched++
                 if( Remove-Package -Package $_ -silent:$silent )
