@@ -261,6 +261,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
 
     If ($Type -eq "Profile") {
         ForEach ($folder in $Path) {
+            
             # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
             $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
                     Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
