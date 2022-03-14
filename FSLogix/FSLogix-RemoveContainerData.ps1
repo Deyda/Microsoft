@@ -5,7 +5,7 @@
 #Requires -Modules "FsLogix.PowerShell.Disk"
 <#
     .SYNOPSIS
-        Removes files and folders in an FSLogix Profile Container to reduce profile size.
+        Removes files and folders in an FSLogix Profile or Office Container to reduce profile size.
 
     .DESCRIPTION
         Reads a list of files and folders from an XML file to delete data based on age.
@@ -13,13 +13,16 @@
         Supports -WhatIf and -Verbose output and returns a list of files removed from the container.
 
     .PARAMETER Path
-        Target path that hosts the FSLogix Profile Containers.
+        Target path that hosts the FSLogix Profile or Office Containers.
     
     .PARAMETER Targets
         Path to an XML file that defines the Contianer profile paths to prune and delete
 
     .PARAMETER MinimumSizeInMB
         Only select Profile Containers from Path, if the container is over the minimum size.
+
+    .PARAMETER Type
+        Do u want Remove Data from Office (ODFC) or Profile (Profile) Container.
 
     .PARAMETER LogPath
         Path to storing a log file for files that are removed from each Container.
@@ -28,21 +31,21 @@
         Override the Days value listed for each Path with action Prune, in the XML file resulting in the forced removal of all files in the path.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -WhatIf
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -WhatIf -Type Profile
 
         Description:
         Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
         Reports on the files/folders to delete without deleting them.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -Confirm:$False -Verbose
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -Confirm:$False -Verbose -Type Profile
 
         Description:
         Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
         Deletes the targets and reports on the total size of files removed for each Container.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -MinimumSizeInMB 800 -LogPath C:\Logs -Confirm:$False -Verbose
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -MinimumSizeInMB 800 -LogPath C:\Logs -Confirm:$False -Verbose -Type Profile
 
         Description:
         Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
@@ -75,6 +78,9 @@ Param (
 
     [Parameter(Mandatory = $False, Position = 2)]
     [System.Int32] $MinimumSizeInMB = 0,
+
+    [Parameter(Mandatory = $True)]
+    [System.String] $Type = "Profile",
 
     [Parameter(Mandatory = $False, Position = 3)]
     [System.Management.Automation.SwitchParameter] $Override,
@@ -253,185 +259,374 @@ Catch [System.Exception] {
 
 If ($xmlDocument -is [System.XML.XMLDocument]) {
 
-    ForEach ($folder in $Path) {
-        # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
-        $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
-                Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
+    If ($Type -eq "Profile") {
+        ForEach ($folder in $Path) {
+            # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
+            $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
+                    Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
 
-        # Step through each Container
-        ForEach ($container in $Containers) {
+            # Step through each Container
+            ForEach ($container in $Containers) {
 
-            # Log file for this container
-            $LogFile = Join-Path -Path $LogPath -ChildPath $($(Split-Path -Path $container.FullName -Leaf) + $((Get-Date).ToFileTimeUtc()) + ".log")
-            Write-Verbose -Message "$($MyInvocation.MyCommand): Writing file list to $LogFile."
+                # Log file for this container
+                $LogFile = Join-Path -Path $LogPath -ChildPath $($(Split-Path -Path $container.FullName -Leaf) + $((Get-Date).ToFileTimeUtc()) + ".log")
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Writing file list to $LogFile."
 
-            If ($WhatIfPreference -eq $True) {
-                $WhatIfPreference = $False
-                "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] WhatIf mode" | Out-File -FilePath $LogFile -Append
-                $WhatIfPreference = $True
-            }
-            Else {
-                "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Delete mode" | Out-File -FilePath $LogFile -Append
-            }
-        
-            # Output array, will contain the list of files/folders removed
-            $fileList = New-Object -TypeName System.Collections.ArrayList
-
-            # Mount the Container
-            Write-Verbose -Message "$($MyInvocation.MyCommand): Mounting $($container.FullName) with Add-FslDriveLetter."
-            $MountPath = Add-FslDriveLetter -Path $container.FullName -Passthru
-
-            # Prune the container
-            If ($Null -ne $MountPath) {
-                Write-Verbose -Message "$($MyInvocation.MyCommand): Container mounted at: $MountPath."
-
-                # Select each Target XPath; walk through each target to delete files
-                ForEach ($target in (Select-Xml -Xml $xmlDocument -XPath "//Target")) {
-
-                    Write-Verbose -Message "$($MyInvocation.MyCommand): Processing target: [$($target.Node.Name)]"
-                    ForEach ($targetPath in $target.Node.Path) {
+                If ($WhatIfPreference -eq $True) {
+                    $WhatIfPreference = $False
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] WhatIf mode" | Out-File -FilePath $LogFile -Append
+                    $WhatIfPreference = $True
+                }
+                Else {
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Delete mode" | Out-File -FilePath $LogFile -Append
+                }
             
-                        # Convert path from XML with environment variable to actual path
-                        $thisPath = Join-Path -Path $MountPath -ChildPath $(ConvertTo-Path -Path $targetPath.innerText)
-                        Write-Verbose -Message "$($MyInvocation.MyCommand): Processing folder: $thisPath"
+                # Output array, will contain the list of files/folders removed
+                $fileList = New-Object -TypeName System.Collections.ArrayList
 
-                        # Get files to delete from Paths and file age; build output array
-                        If (Test-Path -Path $(Get-TestPath -Path $thisPath) -ErrorAction SilentlyContinue) {
+                # Mount the Container
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Mounting $($container.FullName) with Add-FslDriveLetter."
+                $MountPath = Add-FslDriveLetter -Path $container.FullName -Passthru
 
-                            Switch ($targetPath.Action) {
-                                "Prune" {
-                                    # Get file age from Days value in XML; if -Override used, set $dateFilter to now
-                                    If ($Override) {
-                                        $dateFilter = Get-Date
-                                    }
-                                    Else {
-                                        $dateFilter = (Get-Date).AddDays(- $targetPath.Days)
-                                    }
+                # Prune the container
+                If ($Null -ne $MountPath) {
+                    Write-Verbose -Message "$($MyInvocation.MyCommand): Container mounted at: $MountPath."
 
-                                    # Construct the file list for this folder and add to the full list for logging
-                                    $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue -Exclude "desktop.ini" | `
-                                            Where-Object { $_.LastWriteTime -le $dateFilter }
-                                    $fileList.Add($files) | Out-Null
+                    # Select each Target XPath; walk through each target to delete files
+                    ForEach ($target in (Select-Xml -Xml $xmlDocument -XPath "//Target")) {
 
-                                    # Delete files with support for -WhatIf
-                                    ForEach ($file in $files) {
-                                        If ($pscmdlet.ShouldProcess($file.FullName, "Prune")) {
-                                            Try {
-                                                Remove-Item -Path $file.FullName -Force -Recurse -ErrorAction SilentlyContinue
-                                            }
-                                            Catch [System.IO.IOException] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $($file.FullName)."
-                                            }
-                                            Catch [System.UnauthorizedAccessException] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $($file.FullName)."
-                                            }
-                                            Catch [System.Exception] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $($file.FullName)."
-                                            }
+                        Write-Verbose -Message "$($MyInvocation.MyCommand): Processing target: [$($target.Node.Name)]"
+                        ForEach ($targetPath in $target.Node.Path) {
+                
+                            # Convert path from XML with environment variable to actual path
+                            $thisPath = Join-Path -Path $MountPath -ChildPath $(ConvertTo-Path -Path $targetPath.innerText)
+                            Write-Verbose -Message "$($MyInvocation.MyCommand): Processing folder: $thisPath"
+
+                            # Get files to delete from Paths and file age; build output array
+                            If (Test-Path -Path $(Get-TestPath -Path $thisPath) -ErrorAction SilentlyContinue) {
+
+                                Switch ($targetPath.Action) {
+                                    "Prune" {
+                                        # Get file age from Days value in XML; if -Override used, set $dateFilter to now
+                                        If ($Override) {
+                                            $dateFilter = Get-Date
                                         }
-                                    }
-                                }
-
-                                "Delete" {
-                                    # Construct the file list for this folder and add to the full list for logging
-                                    $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue
-                                    $fileList.Add($files) | Out-Null
-
-                                    # Delete the target folder
-                                    If ($pscmdlet.ShouldProcess($thisPath, "Delete")) {
-                                        Try {
-                                            Remove-Item -Path $thisPath -Force -Recurse -ErrorAction SilentlyContinue
+                                        Else {
+                                            $dateFilter = (Get-Date).AddDays(- $targetPath.Days)
                                         }
-                                        Catch [System.IO.IOException] {
-                                            Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $thisPath."
-                                        }
-                                        Catch [System.UnauthorizedAccessException] {
-                                            Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $thisPath."
-                                        }
-                                        Catch [System.Exception] {
-                                            Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $thisPath."
-                                        }
-                                    }
-                                }
-
-                                "Trim" {
-                                    # Determine sub-folders of the target path to delete
-                                    $folders = Get-AllExceptLatest -Path $thisPath
-
-                                    ForEach ($folder in $folders) {
 
                                         # Construct the file list for this folder and add to the full list for logging
-                                        $files = Get-ChildItem -Path $folder -Recurse -Force -ErrorAction SilentlyContinue
+                                        $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue -Exclude "desktop.ini" | `
+                                                Where-Object { $_.LastWriteTime -le $dateFilter }
                                         $fileList.Add($files) | Out-Null
 
-                                        If ($pscmdlet.ShouldProcess($folder, "Trim")) {
-                                            Try {
-                                                Remove-Item -Path $folder -Force -Recurse -ErrorAction SilentlyContinue
-                                            }
-                                            Catch [System.IO.IOException] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $folder."
-                                            }
-                                            Catch [System.UnauthorizedAccessException] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $folder."
-                                            }
-                                            Catch [System.Exception] {
-                                                Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $folder."
+                                        # Delete files with support for -WhatIf
+                                        ForEach ($file in $files) {
+                                            If ($pscmdlet.ShouldProcess($file.FullName, "Prune")) {
+                                                Try {
+                                                    Remove-Item -Path $file.FullName -Force -Recurse -ErrorAction SilentlyContinue
+                                                }
+                                                Catch [System.IO.IOException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $($file.FullName)."
+                                                }
+                                                Catch [System.UnauthorizedAccessException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $($file.FullName)."
+                                                }
+                                                Catch [System.Exception] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $($file.FullName)."
+                                                }
                                             }
                                         }
                                     }
-                                }
-                    
-                                Default {
-                                    Write-Warning -Message "$($MyInvocation.MyCommand): [Unable to determine action for $thisPath]"
+
+                                    "Delete" {
+                                        # Construct the file list for this folder and add to the full list for logging
+                                        $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue
+                                        $fileList.Add($files) | Out-Null
+
+                                        # Delete the target folder
+                                        If ($pscmdlet.ShouldProcess($thisPath, "Delete")) {
+                                            Try {
+                                                Remove-Item -Path $thisPath -Force -Recurse -ErrorAction SilentlyContinue
+                                            }
+                                            Catch [System.IO.IOException] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $thisPath."
+                                            }
+                                            Catch [System.UnauthorizedAccessException] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $thisPath."
+                                            }
+                                            Catch [System.Exception] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $thisPath."
+                                            }
+                                        }
+                                    }
+
+                                    "Trim" {
+                                        # Determine sub-folders of the target path to delete
+                                        $folders = Get-AllExceptLatest -Path $thisPath
+
+                                        ForEach ($folder in $folders) {
+
+                                            # Construct the file list for this folder and add to the full list for logging
+                                            $files = Get-ChildItem -Path $folder -Recurse -Force -ErrorAction SilentlyContinue
+                                            $fileList.Add($files) | Out-Null
+
+                                            If ($pscmdlet.ShouldProcess($folder, "Trim")) {
+                                                Try {
+                                                    Remove-Item -Path $folder -Force -Recurse -ErrorAction SilentlyContinue
+                                                }
+                                                Catch [System.IO.IOException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $folder."
+                                                }
+                                                Catch [System.UnauthorizedAccessException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $folder."
+                                                }
+                                                Catch [System.Exception] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $folder."
+                                                }
+                                            }
+                                        }
+                                    }
+                        
+                                    Default {
+                                        Write-Warning -Message "$($MyInvocation.MyCommand): [Unable to determine action for $thisPath]"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            # Output total size of files deleted
-            If ($fileList.FullName.Count -gt 0) {
-                #$fileSize = ($fileList | Measure-Object -Sum Length).Sum
-                # Work around previous approach to calculating size not working
-                ForEach ($item in $fileList) {
-                    ForEach ($file in $item) {
-                        $fileSize += $file.Length
-                        $fileCount += 1
+                
+
+                # Output total size of files deleted
+                If ($fileList.FullName.Count -gt 0) {
+                    #$fileSize = ($fileList | Measure-Object -Sum Length).Sum
+                    # Work around previous approach to calculating size not working
+                    ForEach ($item in $fileList) {
+                        ForEach ($file in $item) {
+                            $fileSize += $file.Length
+                            $fileCount += 1
+                        }
+                    }
+                    $sizeMiB = Convert-Size -From B -To MiB -Value $fileSize
+
+                    # Write deleted file list out to the log file
+                    If ($WhatIfPreference -eq $True) { $WhatIfPreference = $False }
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list start" | Out-File -FilePath $LogFile -Append
+                    $fileList.FullName | Out-File -FilePath $LogFile -Append -ErrorAction SilentlyContinue
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list end" | Out-File -FilePath $LogFile -Append
+                }
+                Else {
+                    $sizeMiB = 0
+                }
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Total file size deleted: $size MiB."
+
+                # Dismount the container
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Dismounting $($container.FullName) with Dismount-FslDisk."
+                $Dismount = $True
+                Try {
+                    Dismount-FslDisk -Path $container.FullName -ErrorAction Stop | Out-Null
+                }
+                Catch [System.Exception] {
+                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to dismount $($container.FullName)."
+                    $Dismount = $False
+                }
+
+                # Return the size of the deleted files in MiB to the pipeline
+                $PSObject = [PSCustomObject]@{
+                    Path       = $container.FullName
+                    Dismounted = $Dismount
+                    Files      = $fileCount
+                    Deleted    = "$sizeMiB MiB"
+                }
+                Write-Output -InputObject $PSObject
+            }
+        }
+    }
+    If ($Type -eq "ODFC") {
+        ForEach ($folder in $Path) {
+            # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
+            $Containers = Get-ChildItem -Path $folder -Recurse -Filter "ODFC*.vhdx" | `
+                    Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
+
+            # Step through each Container
+            ForEach ($container in $Containers) {
+
+                # Log file for this container
+                $LogFile = Join-Path -Path $LogPath -ChildPath $($(Split-Path -Path $container.FullName -Leaf) + $((Get-Date).ToFileTimeUtc()) + ".log")
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Writing file list to $LogFile."
+
+                If ($WhatIfPreference -eq $True) {
+                    $WhatIfPreference = $False
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] WhatIf mode" | Out-File -FilePath $LogFile -Append
+                    $WhatIfPreference = $True
+                }
+                Else {
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Delete mode" | Out-File -FilePath $LogFile -Append
+                }
+            
+                # Output array, will contain the list of files/folders removed
+                $fileList = New-Object -TypeName System.Collections.ArrayList
+
+                # Mount the Container
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Mounting $($container.FullName) with Add-FslDriveLetter."
+                $MountPath = Add-FslDriveLetter -Path $container.FullName -Passthru
+
+                # Prune the container
+                If ($Null -ne $MountPath) {
+                    Write-Verbose -Message "$($MyInvocation.MyCommand): Container mounted at: $MountPath."
+
+                    # Select each Target XPath; walk through each target to delete files
+                    ForEach ($target in (Select-Xml -Xml $xmlDocument -XPath "//Target")) {
+
+                        Write-Verbose -Message "$($MyInvocation.MyCommand): Processing target: [$($target.Node.Name)]"
+                        ForEach ($targetPath in $target.Node.Path) {
+                
+                            # Convert path from XML with environment variable to actual path
+                            $thisPath = Join-Path -Path $MountPath -ChildPath $(ConvertTo-Path -Path $targetPath.innerText)
+                            Write-Verbose -Message "$($MyInvocation.MyCommand): Processing folder: $thisPath"
+
+                            # Get files to delete from Paths and file age; build output array
+                            If (Test-Path -Path $(Get-TestPath -Path $thisPath) -ErrorAction SilentlyContinue) {
+
+                                Switch ($targetPath.Action) {
+                                    "Prune" {
+                                        # Get file age from Days value in XML; if -Override used, set $dateFilter to now
+                                        If ($Override) {
+                                            $dateFilter = Get-Date
+                                        }
+                                        Else {
+                                            $dateFilter = (Get-Date).AddDays(- $targetPath.Days)
+                                        }
+
+                                        # Construct the file list for this folder and add to the full list for logging
+                                        $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue -Exclude "desktop.ini" | `
+                                                Where-Object { $_.LastWriteTime -le $dateFilter }
+                                        $fileList.Add($files) | Out-Null
+
+                                        # Delete files with support for -WhatIf
+                                        ForEach ($file in $files) {
+                                            If ($pscmdlet.ShouldProcess($file.FullName, "Prune")) {
+                                                Try {
+                                                    Remove-Item -Path $file.FullName -Force -Recurse -ErrorAction SilentlyContinue
+                                                }
+                                                Catch [System.IO.IOException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $($file.FullName)."
+                                                }
+                                                Catch [System.UnauthorizedAccessException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $($file.FullName)."
+                                                }
+                                                Catch [System.Exception] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $($file.FullName)."
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    "Delete" {
+                                        # Construct the file list for this folder and add to the full list for logging
+                                        $files = Get-ChildItem -Path $thisPath -Recurse -Force -ErrorAction SilentlyContinue
+                                        $fileList.Add($files) | Out-Null
+
+                                        # Delete the target folder
+                                        If ($pscmdlet.ShouldProcess($thisPath, "Delete")) {
+                                            Try {
+                                                Remove-Item -Path $thisPath -Force -Recurse -ErrorAction SilentlyContinue
+                                            }
+                                            Catch [System.IO.IOException] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $thisPath."
+                                            }
+                                            Catch [System.UnauthorizedAccessException] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $thisPath."
+                                            }
+                                            Catch [System.Exception] {
+                                                Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $thisPath."
+                                            }
+                                        }
+                                    }
+
+                                    "Trim" {
+                                        # Determine sub-folders of the target path to delete
+                                        $folders = Get-AllExceptLatest -Path $thisPath
+
+                                        ForEach ($folder in $folders) {
+
+                                            # Construct the file list for this folder and add to the full list for logging
+                                            $files = Get-ChildItem -Path $folder -Recurse -Force -ErrorAction SilentlyContinue
+                                            $fileList.Add($files) | Out-Null
+
+                                            If ($pscmdlet.ShouldProcess($folder, "Trim")) {
+                                                Try {
+                                                    Remove-Item -Path $folder -Force -Recurse -ErrorAction SilentlyContinue
+                                                }
+                                                Catch [System.IO.IOException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): IO exception error. Failed to remove $folder."
+                                                }
+                                                Catch [System.UnauthorizedAccessException] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): Access exception error. Failed to remove $folder."
+                                                }
+                                                Catch [System.Exception] {
+                                                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to remove $folder."
+                                                }
+                                            }
+                                        }
+                                    }
+                        
+                                    Default {
+                                        Write-Warning -Message "$($MyInvocation.MyCommand): [Unable to determine action for $thisPath]"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                $sizeMiB = Convert-Size -From B -To MiB -Value $fileSize
 
-                # Write deleted file list out to the log file
-                If ($WhatIfPreference -eq $True) { $WhatIfPreference = $False }
-                "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list start" | Out-File -FilePath $LogFile -Append
-                $fileList.FullName | Out-File -FilePath $LogFile -Append -ErrorAction SilentlyContinue
-                "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list end" | Out-File -FilePath $LogFile -Append
-            }
-            Else {
-                $sizeMiB = 0
-            }
-            Write-Verbose -Message "$($MyInvocation.MyCommand): Total file size deleted: $size MiB."
+                
 
-            # Dismount the container
-            Write-Verbose -Message "$($MyInvocation.MyCommand): Dismounting $($container.FullName) with Dismount-FslDisk."
-            $Dismount = $True
-            Try {
-                Dismount-FslDisk -Path $container.FullName -ErrorAction Stop | Out-Null
-            }
-            Catch [System.Exception] {
-                Write-Warning -Message "$($MyInvocation.MyCommand): failed to dismount $($container.FullName)."
-                $Dismount = $False
-            }
+                # Output total size of files deleted
+                If ($fileList.FullName.Count -gt 0) {
+                    #$fileSize = ($fileList | Measure-Object -Sum Length).Sum
+                    # Work around previous approach to calculating size not working
+                    ForEach ($item in $fileList) {
+                        ForEach ($file in $item) {
+                            $fileSize += $file.Length
+                            $fileCount += 1
+                        }
+                    }
+                    $sizeMiB = Convert-Size -From B -To MiB -Value $fileSize
 
-            # Return the size of the deleted files in MiB to the pipeline
-            $PSObject = [PSCustomObject]@{
-                Path       = $container.FullName
-                Dismounted = $Dismount
-                Files      = $fileCount
-                Deleted    = "$sizeMiB MiB"
+                    # Write deleted file list out to the log file
+                    If ($WhatIfPreference -eq $True) { $WhatIfPreference = $False }
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list start" | Out-File -FilePath $LogFile -Append
+                    $fileList.FullName | Out-File -FilePath $LogFile -Append -ErrorAction SilentlyContinue
+                    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list end" | Out-File -FilePath $LogFile -Append
+                }
+                Else {
+                    $sizeMiB = 0
+                }
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Total file size deleted: $size MiB."
+
+                # Dismount the container
+                Write-Verbose -Message "$($MyInvocation.MyCommand): Dismounting $($container.FullName) with Dismount-FslDisk."
+                $Dismount = $True
+                Try {
+                    Dismount-FslDisk -Path $container.FullName -ErrorAction Stop | Out-Null
+                }
+                Catch [System.Exception] {
+                    Write-Warning -Message "$($MyInvocation.MyCommand): failed to dismount $($container.FullName)."
+                    $Dismount = $False
+                }
+
+                # Return the size of the deleted files in MiB to the pipeline
+                $PSObject = [PSCustomObject]@{
+                    Path       = $container.FullName
+                    Dismounted = $Dismount
+                    Files      = $fileCount
+                    Deleted    = "$sizeMiB MiB"
+                }
+                Write-Output -InputObject $PSObject
             }
-            Write-Output -InputObject $PSObject
         }
     }
 }
