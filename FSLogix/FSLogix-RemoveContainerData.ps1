@@ -4,6 +4,9 @@
 #Requires -Modules "Hyper-V"
 #Requires -Modules "FsLogix.PowerShell.Disk"
 <#
+    Initial Author:                Aaron Parker
+    Author Redesigned Version :    Manuel Winkel (www.deyda.net)
+    
     .SYNOPSIS
         Removes files and folders in an FSLogix Profile or Office Container to reduce profile size.
 
@@ -87,7 +90,7 @@ Param (
     [Parameter(Mandatory = $False, Position = 2)]
     [System.Int32] $MinimumSizeInMB = 0,
 
-    [Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $False)]
     [System.String] $Type = "Profile",
 
     [Parameter(Mandatory = $False, Position = 3)]
@@ -278,15 +281,17 @@ Catch [System.Exception] {
     Throw $_.Exception.Message
 }
 
-Try {
-    [System.XML.XMLDocument] $xmlUser = Get-Content -Path $Userlist -ErrorAction SilentlyContinue
-}
-Catch [System.IO.IOException] {
-    Write-Warning -Message "$($MyInvocation.MyCommand): failed to read: $Userlist."
-    Throw $_.Exception.Message
-}
-Catch [System.Exception] {
-    Throw $_.Exception.Message
+If ($Userlist) {
+    Try {
+        [System.XML.XMLDocument] $xmlUser = Get-Content -Path $Userlist -ErrorAction SilentlyContinue
+    }
+    Catch [System.IO.IOException] {
+        Write-Warning -Message "$($MyInvocation.MyCommand): failed to read: $Userlist."
+        Throw $_.Exception.Message
+    }
+    Catch [System.Exception] {
+        Throw $_.Exception.Message
+    }
 }
 
 If ($xmlDocument -is [System.XML.XMLDocument]) {
