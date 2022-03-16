@@ -74,7 +74,6 @@
 Param (
     [Parameter(Mandatory = $True, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateNotNullOrEmpty()]
-    [ValidateScript( { If (Test-Path $_ -PathType 'Container') { $True } Else { Throw "Cannot find path $_" } })]
     [System.String[]] $Path,
 
     [Parameter(Mandatory = $True, Position = 1, ValueFromPipelineByPropertyName)]
@@ -300,10 +299,19 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
         If ($Userlist) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
-                $folder = "$path" + "\" + "$user" + "\" + "$user" + "_" + "$sid"
+                Switch ($Path) {
+                    { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
+                    { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
+                }
+                If (Test-Path $Path -PathType 'Leaf') { 
+                    $True 
+                } Else { 
+                    Write-Host -ForegroundColor Red  "Cannot find path $Path"
+                    Break
+                }
                 #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
-                $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
+                $Containers = Get-ChildItem -Path $Path -Recurse -Filter "Profile*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
 
                 # Step through each Container
@@ -675,10 +683,19 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
         If ($Userlist) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
-                $folder = "$path" + "\" + "$user" + "\" + "$user" + "_" + "$sid"
+                Switch ($Path) {
+                    { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
+                    { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
+                }
+                If (Test-Path $Path -PathType 'Leaf') { 
+                    $True 
+                } Else { 
+                    Write-Host -ForegroundColor Red  "Cannot find path $Path"
+                    Break
+                }
                 #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
-                $Containers = Get-ChildItem -Path $folder -Recurse -Filter "ODFC*.vhdx" | `
+                $Containers = Get-ChildItem -Path $Path -Recurse -Filter "ODFC*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
 
                 # Step through each Container
@@ -1053,6 +1070,8 @@ Else {
 
 # Stop time recording
 $stopWatch.Stop()
-"[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Time to complete $($stopWatch.Elapsed.TotalMilliseconds) ms" | Out-File -FilePath $LogFile -Append
-"[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Total file size deleted $size MiB" | Out-File -FilePath $LogFile -Append
+If ($LogFile) {
+    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Time to complete $($stopWatch.Elapsed.TotalMilliseconds) ms" | Out-File -FilePath $LogFile -Append
+    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Total file size deleted $size MiB" | Out-File -FilePath $LogFile -Append
+}
 Write-Verbose -Message "$($MyInvocation.MyCommand): Script took $($stopWatch.Elapsed.TotalMilliseconds) ms to complete."
