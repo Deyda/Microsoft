@@ -34,29 +34,29 @@
         Override the Days value listed for each Path with action Prune, in the XML file resulting in the forced removal of all files in the path.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -WhatIf -Type Profile
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets_Profile.xml -WhatIf -Type Profile
 
         Description:
-        Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
+        Reads targets_Profile.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
         Reports on the files/folders to delete without deleting them.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -Confirm:$False -Verbose -Type Profile
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets_Profile.xml -Confirm:$False -Verbose -Type Profile
 
         Description:
-        Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
+        Reads targets_Profile.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
         Deletes the targets and reports on the total size of files removed for each Container.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets.xml -MinimumSizeInMB 800 -LogPath C:\Logs -Confirm:$False -Verbose -Type Profile
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path \\server\Containers -Targets .\targets_Profile.xml -MinimumSizeInMB 800 -LogPath C:\Logs -Confirm:$False -Verbose -Type Profile
 
         Description:
-        Reads targets.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
+        Reads targets_Profile.xml that defines a list of files and folders to delete from Profile Containers contained in \\server\Containers.
         Selects only Containers in Path that are 800 MB or larger. Stores a log file for each container in C:\Logs.
         Deletes the targets and reports on the total size of files removed for each Container.
 
     .INPUTS
-        XML file that defines target files and folders to remove.
+        XML file that defines target files and folders to remove or a list of user.
 
     .OUTPUTS
         [System.String]
@@ -296,7 +296,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
                 $folder = "$path" + "\" + "$user" + "\" + "$user" + "_" + "$sid"
-                Write-Host $folder
+                #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
                 $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
@@ -481,7 +481,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
             }
         } else {
             ForEach ($folder in $Path) {
-                Write-Host $folder
+                #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
                 $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
@@ -671,7 +671,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
                 $folder = "$path" + "\" + "$user" + "\" + "$user" + "_" + "$sid"
-                Write-Host $folder
+                #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
                 $Containers = Get-ChildItem -Path $folder -Recurse -Filter "ODFC*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
@@ -855,10 +855,8 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                 }
             }
         } else {
-            ForEach ($user in $xmlUser.Userlist.user) {
-                $Sid = Get-SIDPath -User $User
-                $folder = "$path" + "\" + "$user" + "\" + "$user" + "_" + "$sid"
-                Write-Host $folder
+            ForEach ($folder in $Path) {
+                #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
                 $Containers = Get-ChildItem -Path $folder -Recurse -Filter "ODFC*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
