@@ -1,5 +1,5 @@
 # Microsoft
-##About FSLogix-RemoveContainerData.ps1¶
+## About FSLogix-RemoveContainerData.ps1¶
 FSLogix-RemoveContainerData is used to delete files and folders in a user's FSLogix Profile and Office Container by mounting the Container and pruning files, thus keeping the Container size to a minimum. The script reads an XML file that defines a list of files and folders to remove from the Container. Actions on a target path can be:
 
 Prune - the XML can include a number that defines the age in days for last write that the file must be older than to be deleted. Essentially reducing the size of the folder.
@@ -15,8 +15,9 @@ ActiveDirectory - Installed as a feature in Windows Server or via RSAT
 Hyper-V - Installed as a feature in Windows Server or via RSAT
 Fslogix.Powershell.Disk - this module is found here: https://github.com/aaronparker/fslogix/tree/main/Modules/Fslogix.Powershell.Disk
 
-Usage¶
+### Usage
 
 .\FSLogix-RemoveContainerData.ps1 -Path \\server\FSLogixContainer -Targets .\targets.xml -Type Profile
-Running FSLogix-RemoveContainerData.ps1¶
+
+#### Running FSLogix-RemoveContainerData.ps1
 FSLogix-RemoveContainerData.ps1 must be run outside the user session when Profile Containers are not in use. The script will require exclusive access to the Container to mount it with read/write access. Remove-ContainerData.ps1 could be run as a schedule task outside of business hours from a management host.
