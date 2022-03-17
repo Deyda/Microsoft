@@ -303,7 +303,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                     { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
                     { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
                 }
-                If (Test-Path $Path -PathType 'Leaf') { 
+                If (Test-Path $Path) { 
                     $True 
                 } Else { 
                     Write-Host -ForegroundColor Red  "Cannot find path $Path"
@@ -687,7 +687,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                     { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
                     { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
                 }
-                If (Test-Path $Path -PathType 'Leaf') { 
+                If (Test-Path $Path) { 
                     $True 
                 } Else { 
                     Write-Host -ForegroundColor Red  "Cannot find path $Path"
