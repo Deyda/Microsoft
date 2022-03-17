@@ -299,19 +299,17 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
         If ($Userlist) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
-                Switch ($Path) {
-                    { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
-                    { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
+                Switch ($folder) {
+                    { $_ -match "%SID%" } { $folder = $folder -replace "%SID%", "$SID" }
+                    { $_ -match "%USERNAME%" } { $folder = $folder -replace "%USERNAME%", "$User" }
                 }
-                If (Test-Path $Path) { 
-                    $True 
-                } Else { 
-                    Write-Host -ForegroundColor Red  "Cannot find path $Path"
+                If (!(Test-Path $folder)) {
+                    Write-Host -ForegroundColor Red  "Cannot find path $folder"
                     Break
                 }
                 #Write-Host $folder
-                # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
-                $Containers = Get-ChildItem -Path $Path -Recurse -Filter "Profile*.vhdx" | `
+                # Get Profile Containers from the target folder; Only select containers over the specified minimum size (default 0)
+                $Containers = Get-ChildItem -Path $folder -Recurse -Filter "Profile*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
 
                 # Step through each Container
@@ -683,19 +681,18 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
         If ($Userlist) {
             ForEach ($user in $xmlUser.Userlist.user) {
                 $Sid = Get-SIDPath -User $User
-                Switch ($Path) {
-                    { $_ -match "%SID%" } { $Path = $Path -replace "%SID%", "$SID" }
-                    { $_ -match "%USERNAME%" } { $Path = $Path -replace "%USERNAME%", "$User" }
+                $folder = $Path
+                Switch ($folder) {
+                    { $_ -match "%SID%" } { $folder = $folder -replace "%SID%", "$SID" }
+                    { $_ -match "%USERNAME%" } { $folder = $folder -replace "%USERNAME%", "$User" }
                 }
-                If (Test-Path $Path) { 
-                    $True 
-                } Else { 
-                    Write-Host -ForegroundColor Red  "Cannot find path $Path"
+                If (!(Test-Path $folder)) {
+                    Write-Host -ForegroundColor Red  "Cannot find path $folder"
                     Break
                 }
                 #Write-Host $folder
                 # Get Profile Containers from the target path; Only select containers over the specified minimum size (default 0)
-                $Containers = Get-ChildItem -Path $Path -Recurse -Filter "ODFC*.vhdx" | `
+                $Containers = Get-ChildItem -Path $folder -Recurse -Filter "ODFC*.vhdx" | `
                         Where-Object { $_.Length -gt (Convert-Size -From MB -To KB -Value $MinimumSizeInMB) }
 
                 # Step through each Container
