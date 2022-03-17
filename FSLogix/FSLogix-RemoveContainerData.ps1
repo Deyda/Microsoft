@@ -58,6 +58,14 @@
         Selects only Containers in Path that are 800 MB or larger. Stores a log file for each container in C:\Logs.
         Deletes the targets and reports on the total size of files removed for each Container.
 
+    .EXAMPLE
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path D:\TMP\O365Container\%username%\%username%_%sid% -type ODFC -Userlist user.xml -Targets targets_ODFC.xml -Confirm:$False
+
+        Description:
+        Reads targets_ODFC.xml that defines a list of files and folders to delete from Office Containers contained in D:\TMP\O365Container\%username%\%username%_%sid%.
+        Selects only Containers from users in Path that are listed in user.xml. Stores a log file for each container in C:\Logs.
+        Deletes the targets and reports on the total size of files removed for each Container.
+
     .INPUTS
         XML file that defines target files and folders to remove or a list of user.
 
