@@ -30,12 +30,12 @@ $subfolder2 = "UPM_Profile"
 #########################################################################################
 # Do not edit here
 #########################################################################################
-$oldprofiles = gci $oldprofilepath | select -Expand fullname | sort | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"| %{
+$oldprofiles = Get-ChildItem $oldprofilepath | Select-Object -Expand fullname | Sort-Object | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"| ForEach-Object{
 Join-Path $_ $subfolder2
 }
 
 foreach ($old in $oldprofiles) {
-$OldSplit = $old.split("\\")
+#$OldSplit = $old.split("\\")
 $OldStrings = ([regex]::Matches($old, "\\" )).count
 $OldSAM = $oldStrings - 1
 $sam = $old.split("\\")[$OldSAM]
@@ -64,7 +64,7 @@ $script2 = "sel vdisk file=`"$vhd`"`r`nattach vdisk"
 $script3 = "sel vdisk file=`"$vhd`"`r`ncreate part prim`r`nselect part 1`r`nformat fs=ntfs quick"
 $script4 = "sel vdisk file=`"$vhd`"`r`nsel part 1`r`nassign letter=Y"
 $script5 = "sel vdisk file`"$vhd`"`r`ndetach vdisk"
-$script6 = "sel vdisk file=`"$vhd`"`r`nattach vdisk readonly`"`r`ncompact vdisk"
+#$script6 = "sel vdisk file=`"$vhd`"`r`nattach vdisk readonly`"`r`ncompact vdisk"
 
 if (!(test-path $vhd)) {
 $script1 | diskpart
