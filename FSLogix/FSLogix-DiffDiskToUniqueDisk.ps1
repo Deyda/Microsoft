@@ -80,10 +80,10 @@ Param (
     
     )
 
+If (!(Test-Path $tmp)) { New-Item -Path $tmp -ItemType directory | Out-Null }
 
-#$path = "D:\Friedhof\Spielwiese"
-#$tmp = "D:\TMP"
-#$target = "D:\Friedhof\Folder2"
+$tmpall = $tmp+"/*"
+Remove-Item $tmpall -Recurse
 
 if (!$target){
     $target = $path
@@ -93,52 +93,68 @@ $regex1 = $target -match [regex] "\\$"
 if ($regex1 -eq $False){
 $target = $target+"\"}
 
-$tmpall = $tmp+"\*"
-$pathall = $path+"\*"
+$sources = gci $path | select -Expand fullname | sort | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"
+foreach ($source in $sources) {
+    $sourceStrings = ([regex]::Matches($source, "\\" )).count
+    $sam = $source.split("\\")[$SourceStrings]
+    $tmpVHDX = $tmp+"\ODFC_"+$sam+".VHDX"
+    $targetVHDX = $target + $sam
+    $sourceVHDX = $source+"\ODFC_"+$sam+".VHDX"
     
+    "Copying $sourceVHDX to $tmp"
+
     if ($count -ge 1) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-0.VHDX") } 
     }
     if ($count -ge 2) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-1.VHDX") } 
     }
     if ($count -ge 3) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-2.VHDX") } 
     }
     if ($count -ge 4) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-3.VHDX") } 
     }
     if ($count -ge 5) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-4.VHDX") } 
     }
     if ($count -ge 6) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-5.VHDX") } 
     }
     if ($count -ge 7) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-6.VHDX") } 
     }
     if ($count -ge 8) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-7.VHDX") } 
     }
     if ($count -ge 9) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-8.VHDX") } 
     }
     if ($count -ge 10) {
-        Copy-Item -Path $pathall -Destination $tmp -exclude *-SESSION-* -Recurse -Force
+        Copy-Item -Path $sourceVHDX -Destination $tmp -Force
         Get-ChildItem -Path $tmp -Include *vhdx -exclude *-SESSION-* -Filter *.VHDX -Recurse | ForEach-Object { Rename-Item $_ -NewName $_.Name.Replace(".VHDX","-SESSION-9.VHDX") } 
     }
-    Copy-Item -Path $tmpall -Destination $target -Recurse -Force
+
+    "Copying $sam from $tmp to $targetvhdx"
+
+    Copy-Item -Path $tmpall -Destination $targetVHDX -Recurse -Force
+
+    "Delete $sam from $tmp"
+
     Remove-Item $tmpall -Recurse
-    Get-ChildItem -Path $path -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
+
+    "Set ACL for new container from $sam"
+
+    Get-ChildItem -Path $source -Recurse -Filter *.VHDX -Exclude *-SESSION-*.VHDX | Foreach-Object {
         $PathACL = $($_.Directory)
         $ContainerName = $($_.Name)
         $parts = $ContainerName.split(".")
@@ -151,5 +167,10 @@ $pathall = $path+"\*"
         Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL
         }
     if ($Delete){
-        Remove-Item $pathall -exclude *-SESSION-* -Recurse
+
+        "Delete $sourceVHDX"
+
+        Remove-Item $sourceVHDX -exclude *-SESSION-* -Recurse
     }
+    ""
+}
