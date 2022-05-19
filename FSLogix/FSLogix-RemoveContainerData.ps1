@@ -59,10 +59,10 @@
         Deletes the targets and reports on the total size of files removed for each Container.
 
     .EXAMPLE
-        C:\> .\FSLogix-RemoveContainerData.ps1 -Path D:\TMP\O365Container\%username%\%username%_%sid% -type ODFC -Userlist user.xml -Targets targets_ODFC.xml -Confirm:$False
+        C:\> .\FSLogix-RemoveContainerData.ps1 -Path D:\TMP\O365Container\%USER%\%USER%_%sid% -type ODFC -Userlist user.xml -Targets targets_ODFC.xml -Confirm:$False
 
         Description:
-        Reads targets_ODFC.xml that defines a list of files and folders to delete from Office Containers contained in D:\TMP\O365Container\%username%\%username%_%sid%.
+        Reads targets_ODFC.xml that defines a list of files and folders to delete from Office Containers contained in D:\TMP\O365Container\%USER%\%USER%_%sid%.
         Selects only Containers from users in Path that are listed in user.xml. Stores a log file for each container in C:\Logs.
         Deletes the targets and reports on the total size of files removed for each Container.
 
@@ -309,7 +309,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                 $Sid = Get-SIDPath -User $User
                 Switch ($folder) {
                     { $_ -match "%SID%" } { $folder = $folder -replace "%SID%", "$SID" }
-                    { $_ -match "%USERNAME%" } { $folder = $folder -replace "%USERNAME%", "$User" }
+                    { $_ -match "%USER%" } { $folder = $folder -replace "%USER%", "$User" }
                 }
                 If (!(Test-Path $folder)) {
                     Write-Host -ForegroundColor Red  "Cannot find path $folder"
@@ -692,7 +692,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                 $folder = $Path
                 Switch ($folder) {
                     { $_ -match "%SID%" } { $folder = $folder -replace "%SID%", "$SID" }
-                    { $_ -match "%USERNAME%" } { $folder = $folder -replace "%USERNAME%", "$User" }
+                    { $_ -match "%USER%" } { $folder = $folder -replace "%USER%", "$User" }
                 }
                 If (!(Test-Path $folder)) {
                     Write-Host -ForegroundColor Red  "Cannot find path $folder"
@@ -785,6 +785,23 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                                             # Delete the target folder
                                             If ($pscmdlet.ShouldProcess($thisPath, "Delete")) {
                                                 Try {
+                                                    # Output total size of files deleted
+                                                    If ($fileList.FullName.Count -gt 0) {
+
+                                                        $fileSize += $filelist.Length
+                                                        $fileCount += 1
+
+                                                        $sizeMiB = Convert-Size -From B -To MiB -Value $fileSize
+
+                                                        # Write deleted file list out to the log file
+                                                        If ($WhatIfPreference -eq $True) { $WhatIfPreference = $False }
+                                                        "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list start" | Out-File -FilePath $LogFile -Append
+                                                        $fileList.FullName | Out-File -FilePath $LogFile -Append -ErrorAction SilentlyContinue
+                                                        "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list end" | Out-File -FilePath $LogFile -Append
+                                                    }
+                                                    Else {
+                                                        $sizeMiB = 0
+                                                    }
                                                     Remove-Item -Path $thisPath -Force -Recurse -ErrorAction SilentlyContinue
                                                 }
                                                 Catch [System.IO.IOException] {
@@ -835,30 +852,7 @@ If ($xmlDocument -is [System.XML.XMLDocument]) {
                         }
                     }
 
-                    
-
-                    # Output total size of files deleted
-                    If ($fileList.FullName.Count -gt 0) {
-                        #$fileSize = ($fileList | Measure-Object -Sum Length).Sum
-                        # Work around previous approach to calculating size not working
-                        ForEach ($item in $fileList) {
-                            ForEach ($file in $item) {
-                                $fileSize += $file.Length
-                                $fileCount += 1
-                            }
-                        }
-                        $sizeMiB = Convert-Size -From B -To MiB -Value $fileSize
-
-                        # Write deleted file list out to the log file
-                        If ($WhatIfPreference -eq $True) { $WhatIfPreference = $False }
-                        "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list start" | Out-File -FilePath $LogFile -Append
-                        $fileList.FullName | Out-File -FilePath $LogFile -Append -ErrorAction SilentlyContinue
-                        "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] File list end" | Out-File -FilePath $LogFile -Append
-                    }
-                    Else {
-                        $sizeMiB = 0
-                    }
-                    Write-Verbose -Message "$($MyInvocation.MyCommand): Total file size deleted: $size MiB."
+                    Write-Verbose -Message "$($MyInvocation.MyCommand): Total file size deleted: $sizeMiB MiB."
 
                     # Dismount the container
                     Write-Verbose -Message "$($MyInvocation.MyCommand): Dismounting $($container.FullName) with Dismount-FslDisk."
@@ -1077,6 +1071,6 @@ Else {
 $stopWatch.Stop()
 If ($LogFile) {
     "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Time to complete $($stopWatch.Elapsed.TotalMilliseconds) ms" | Out-File -FilePath $LogFile -Append
-    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Total file size deleted $size MiB" | Out-File -FilePath $LogFile -Append
+    "[$($MyInvocation.MyCommand)][$(Get-Date -Format FileDateTime)] Total file size deleted $sizeMiB MiB" | Out-File -FilePath $LogFile -Append
 }
 Write-Verbose -Message "$($MyInvocation.MyCommand): Script took $($stopWatch.Elapsed.TotalMilliseconds) ms to complete."
