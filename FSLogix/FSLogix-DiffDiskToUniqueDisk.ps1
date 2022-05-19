@@ -93,7 +93,7 @@ $regex1 = $target -match [regex] "\\$"
 if ($regex1 -eq $False){
 $target = $target+"\"}
 
-$sources = gci $path | select -Expand fullname | sort | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"
+$sources = Get-ChildItem $path | Select-Object -Expand fullname | Sort-Object | out-gridview -OutputMode Multiple -title "Select profile(s) to convert"
 foreach ($source in $sources) {
     $sourceStrings = ([regex]::Matches($source, "\\" )).count
     $sam = $source.split("\\")[$SourceStrings]
@@ -101,7 +101,7 @@ foreach ($source in $sources) {
     $targetVHDX = $target + $sam
     $sourceVHDX = $source+"\ODFC_"+$sam+".VHDX"
     
-    "Copying $sourceVHDX to $tmp"
+    "Copying $sourceVHDX to $tmpvhdx"
 
     if ($count -ge 1) {
         Copy-Item -Path $sourceVHDX -Destination $tmp -Force
@@ -160,11 +160,11 @@ foreach ($source in $sources) {
         $parts = $ContainerName.split(".")
         $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
         Get-ChildItem -Path $target -Recurse -Filter $SessionName | Foreach-Object {
-        $TargetACL = $($_.Directory)}
+        $TargetAC = $($_.Directory)}
         $PathACLPlus = ""+$PathACL+"\*.VHDX"
-        $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
+        $TargetACLPlus = ""+$TargetAC+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
-        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL
+        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetAC
         }
     if ($Delete){
 
