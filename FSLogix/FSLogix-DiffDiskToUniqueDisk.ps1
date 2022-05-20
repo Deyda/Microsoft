@@ -160,11 +160,11 @@ foreach ($source in $sources) {
         $parts = $ContainerName.split(".")
         $SessionName = $parts[0]+"-SESSION-0."+$parts[1]
         Get-ChildItem -Path $target -Recurse -Filter $SessionName | Foreach-Object {
-        $TargetAC = $($_.Directory)}
+        $TargetACL = $($_.Directory)}
+        $TargetACLPlus = ""+$TargetACL+"\*.VHDX"
         $PathACLPlus = ""+$PathACL+"\*.VHDX"
-        $TargetACLPlus = ""+$TargetAC+"\*.VHDX"
         Get-Acl -Path $PathACLPlus -exclude *-SESSION-*.VHDX | Set-Acl -Path $TargetACLPlus
-        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetAC
+        Get-Acl -Path $PathACLPlus | Set-Acl -Path $TargetACL
         }
     if ($Delete){
 

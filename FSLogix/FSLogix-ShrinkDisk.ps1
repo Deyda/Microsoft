@@ -1480,6 +1480,7 @@
             Get-ChildItem -File -Filter merge.vhd? -Path $Path -Recurse | Remove-Item -ErrorAction SilentlyContinue
             Get-ChildItem -File -Filter RW.vhd? -Path $Path -Recurse | Remove-Item -ErrorAction SilentlyContinue
             Get-ChildItem -File -Filter *_ODFC.vhd? -Path $Path -Recurse | Remove-Item -ErrorAction SilentlyContinue
+            Get-ChildItem -File -Filter *_ODFC.vhd?.metadata -Path $Path -Recurse | Remove-Item -ErrorAction SilentlyContinue
             }
         }
         else {
@@ -1488,6 +1489,7 @@
             Get-ChildItem -File -Filter merge.vhd? -Path $Path | Remove-Item -ErrorAction SilentlyContinue
             Get-ChildItem -File -Filter RW.vhd? -Path $Path | Remove-Item -ErrorAction SilentlyContinue
             Get-ChildItem -File -Filter *_ODFC.vhd? -Path $Path | Remove-Item -ErrorAction SilentlyContinue
+            Get-ChildItem -File -Filter *_ODFC.vhd?.metadata -Path $Path -Recurse | Remove-Item -ErrorAction SilentlyContinue
             }
         }
 
