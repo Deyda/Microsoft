@@ -26,6 +26,9 @@ Path to the new FSLogix Container Location. If not set, the source (path) is use
 
 Delete the source Disk Folder.
 
+.PARAMETER copy
+
+Copy the source Disk Folder.
 
 .EXAMPLE
 
@@ -54,8 +57,12 @@ Param (
     [Parameter(
         HelpMessage = 'Delete Original Folder'
     )]
-    [switch]$delete
+    [switch]$delete,
 
+    [Parameter(
+        HelpMessage = 'Copy not move Original Folder'
+    )]
+    [switch]$copy
 )
 
 
@@ -90,7 +97,11 @@ Get-ChildItem -Recurse $path2 -Include *vhdx -ErrorAction SilentlyContinue | For
         New-Item -ItemType directory -Path $destnew
     }
     #move the disk
-    Move-Item -Path $vhdPath -Destination $destnew
+    if ($Copy) {
+        Copy-Item -Path $vhdPath -Destination $destnew
+    } else {
+        Move-Item -Path $vhdPath -Destination $destnew
+    }
     #set permissions
     Get-Acl -Path $pathSource | Set-Acl -Path $destnew
 
