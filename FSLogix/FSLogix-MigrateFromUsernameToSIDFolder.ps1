@@ -77,7 +77,7 @@ If (!(Test-Path $target)) {
 }
 
 #Get all paths which end in vhdx and process them
-Get-ChildItem -Recurse $path2 -Include *vhdx -ErrorAction SilentlyContinue | ForEach-Object {
+Get-ChildItem -Recurse $path -Include *vhdx -ErrorAction SilentlyContinue | ForEach-Object {
 
     $vhdPath = $_
     $pathSource = $vhdPath.directory
