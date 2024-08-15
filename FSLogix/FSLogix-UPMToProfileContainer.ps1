@@ -110,6 +110,10 @@ $urigpathpermission2 = Get-Acl -Path $urigpathper2
 Set-Acl -AclObject $urigpathpermission2 -Path 'Y:\Profile'
 dir -r 'Y:\Profile' | Set-Acl -AclObject $urigpathpermission2#>
 
+#Remove Windows Search Folder, to repair Windows Per User Search. Windows Search Folder is created automaticly and works after restart of Windows Search Service
+if (Test-Path "Y:\Profile\AppData\Roaming\Microsoft\Search") {
+  Remove-Item -Path "Y:\Profile\AppData\Roaming\Microsoft\Search" -Force -Recurse | Out-Null
+  }
 
 if (!(Test-Path "Y:\Profile\AppData\Local\FSLogix")) {
 New-Item -Path "Y:\Profile\AppData\Local\FSLogix" -ItemType directory | Out-Null
