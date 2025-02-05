@@ -4,7 +4,7 @@
 Name:               FSLogix-RemoveDirtyBit
 Author:             Manuel Winkel
 Version:            1.1            
-Last modified Date: 05-05-2022
+Last modified Date: 05-02-2025
 
 *************************************************************************************************************************************
 
