@@ -1,0 +1,3 @@
+select vdisk file="C:\tmp\Profile_adm-cgronau - Kopie.VHDX"
+detach vdisk
+exit
