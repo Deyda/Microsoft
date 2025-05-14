@@ -1223,7 +1223,8 @@
             }
 
             if ( $sizeMax -ne $partInfo.Size ) {
-                Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction Stop
+                Write-Verbose "Trying to resize partition to $sizeMax bytes (Current: $($partInfo.Size))"
+                Resize-Partition -InputObject $partInfo -Size $sizeMax -ErrorAction Continue
                 Write-Warning -Message "Extended Disk $Disk"
                 }
 
