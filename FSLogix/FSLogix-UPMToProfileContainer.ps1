@@ -53,7 +53,7 @@ $regtext = "Windows Registry Editor Version 5.00
 `"RunLogonScriptSync`"=dword:00000000
 "
 
-$nfolder = join-path $newprofilepath ($sam)
+$nfolder = Join-Path $newprofilepath ("$sam" + "_" + "$sid")
 if (!(test-path $nfolder)) {New-Item -Path $nfolder -ItemType directory | Out-Null}
 & icacls $nfolder /setowner "$env:userdomain\$sam" /T /C
 & icacls $nfolder /grant $env:userdomain\$sam`:`(OI`)`(CI`)F /T
