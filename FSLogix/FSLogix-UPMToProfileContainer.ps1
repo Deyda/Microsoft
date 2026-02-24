@@ -60,7 +60,7 @@ function Get-FreeDriveLetter {
         $used += (Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name })
     } catch {}
 
-    $used = $used | ForEach-Object { $_.ToUpper() } | Sort-Object -Unique
+    $used = $used | ForEach-Object { $_.ToString().ToUpper() } | Sort-Object -Unique
 
     $pref = $Preferred.ToUpper()
     if ($used -notcontains $pref) { return $pref }
@@ -118,8 +118,8 @@ foreach ($old in $oldprofiles) {
 
     # Pick a free drive letter for THIS iteration
     $VHDDriveLetter = Get-FreeDriveLetter -Preferred $PreferredVHDDriveLetter
-    $MountRoot = "$($VHDDriveLetter):\"
-    $ProfileRoot = Join-Path $MountRoot "Profile"
+    $MountRoot  = "$($VHDDriveLetter):\"
+    $ProfileRoot = "$($VHDDriveLetter):\Profile"
 
     # Diskpart scripts
     $script1 = "create vdisk file=`"$vhd`" maximum 30720 type=expandable"
