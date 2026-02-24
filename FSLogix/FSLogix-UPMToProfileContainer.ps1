@@ -163,7 +163,7 @@ foreach ($old in $oldprofiles) {
         Start-Sleep -Seconds 2
     }
 
-    "Copying $old to $vhd (Drive $VHDDriveLetter:), excluding Teams/Publishers caches..."
+    "Copying $old to $vhd (Drive $($VHDDriveLetter):), excluding Teams/Publishers caches..."
     Start-Sleep -Seconds 2
 
     # Copy profile with excludes
